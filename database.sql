@@ -36,6 +36,20 @@ CREATE TABLE `Product` (
   FOREIGN KEY (`unit_id`) REFERENCES `Unit`(`id`)
 );
 
+CREATE TABLE `User` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `full_name` VARCHAR(100) NOT NULL,
+  `username` VARCHAR(50) NOT NULL UNIQUE,
+  `email` VARCHAR(100) NOT NULL UNIQUE,
+  `password` VARCHAR(255) NOT NULL,
+  `gender` VARCHAR(10),
+  `contact` VARCHAR(20),
+  `status` TINYINT(1) DEFAULT 1,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+);
+
 INSERT INTO `Category` (`name`, `status`) VALUES 
 ('Smartphones', 1),
 ('Laptops', 1),
@@ -78,4 +92,9 @@ VALUES
 ('Amazon Fire HD', 'AFHD', 1, 0, 1, 1, 80.00, 109.00, 120.00, 4, 4),
 ('Sony Headphones', 'SH01', 1, 0, 1, 1, 60.00, 79.00, 89.00, 3, 3),
 ('HP Envy', 'HPE', 1, 0, 1, 1, 700.00, 899.00, 999.00, 2, 2);
+
+INSERT INTO `User` (full_name, username, email, password, gender, contact, status) VALUES
+('Admin User', 'admin', 'admin@example.com', 'Admin@123', 'Male', '9800000001', 1),
+('Sandip Shakya', 'sandip', 'sandip@example.com', 'User@123', 'Male', '9800000002', 1),
+('Ram Bahadur', 'ram_bahadur', 'ram@example.com', 'User@123', 'Male', '9800000003', 1);
 
