@@ -1,9 +1,10 @@
-package com.sandipsky.spring_boot_inventory_system.service;
+package com.sandipsky.inventory_system.service;
 
-import com.sandipsky.spring_boot_inventory_system.entity.Category;
-import com.sandipsky.spring_boot_inventory_system.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.sandipsky.inventory_system.entity.Category;
+import com.sandipsky.inventory_system.repository.CategoryRepository;
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class CategoryService {
     public Category updateCategory(int id, Category category) {
         Category existing = repository.findById(id).get();
         existing.setName(category.getName());
-        existing.setStatus(category.isStatus());
+        existing.setActive(category.isActive());
         return repository.save(existing);
     }
 

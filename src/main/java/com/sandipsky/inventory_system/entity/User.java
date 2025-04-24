@@ -1,4 +1,4 @@
-package com.sandipsky.spring_boot_inventory_system.entity;
+package com.sandipsky.inventory_system.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -23,5 +23,5 @@ public class User {
     private String password;
     private String gender;
     private String contact;
-    private boolean status;
+    private boolean isActive;
 }

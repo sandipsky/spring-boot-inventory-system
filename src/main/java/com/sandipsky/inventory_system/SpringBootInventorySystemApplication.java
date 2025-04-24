@@ -1,4 +1,4 @@
-package com.sandipsky.spring_boot_inventory_system;
+package com.sandipsky.inventory_system;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

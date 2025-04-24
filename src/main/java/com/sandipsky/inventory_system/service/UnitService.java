@@ -1,9 +1,10 @@
-package com.sandipsky.spring_boot_inventory_system.service;
+package com.sandipsky.inventory_system.service;
 
-import com.sandipsky.spring_boot_inventory_system.entity.Unit;
-import com.sandipsky.spring_boot_inventory_system.repository.UnitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.sandipsky.inventory_system.entity.Unit;
+import com.sandipsky.inventory_system.repository.UnitRepository;
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class UnitService {
     public Unit updateUnit(int id, Unit unit) {
         Unit existing = repository.findById(id).get();
         existing.setName(unit.getName());
-        existing.setStatus(unit.isStatus());
+        existing.setActive(unit.isActive());
         return repository.save(existing);
     }
 

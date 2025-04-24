@@ -1,4 +1,4 @@
-package com.sandipsky.spring_boot_inventory_system.entity;
+package com.sandipsky.inventory_system.entity;
 // import java.util.List;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class Unit {
+public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,8 +15,8 @@ public class Unit {
 
     @Column(nullable = false, unique = true)
     private String name;
-    private boolean status;
+    private boolean isActive;
 
-    // @OneToMany(mappedBy = "unit")
+    // @OneToMany(mappedBy = "category")
     // private List<Product> products;
 }

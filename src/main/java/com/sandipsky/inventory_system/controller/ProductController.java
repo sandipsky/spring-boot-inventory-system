@@ -1,9 +1,10 @@
-package com.sandipsky.spring_boot_inventory_system.controller;
+package com.sandipsky.inventory_system.controller;
 
-import com.sandipsky.spring_boot_inventory_system.entity.Product;
-import com.sandipsky.spring_boot_inventory_system.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import com.sandipsky.inventory_system.entity.Product;
+import com.sandipsky.inventory_system.service.ProductService;
 
 import java.util.List;
 

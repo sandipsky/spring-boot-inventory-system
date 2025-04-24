@@ -1,7 +1,8 @@
-package com.sandipsky.spring_boot_inventory_system.repository;
+package com.sandipsky.inventory_system.repository;
 
-import com.sandipsky.spring_boot_inventory_system.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.sandipsky.inventory_system.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
     

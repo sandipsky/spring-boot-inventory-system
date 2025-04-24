@@ -1,7 +1,8 @@
-package com.sandipsky.spring_boot_inventory_system.repository;
+package com.sandipsky.inventory_system.repository;
 
-import com.sandipsky.spring_boot_inventory_system.entity.Unit;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.sandipsky.inventory_system.entity.Unit;
 
 public interface UnitRepository extends JpaRepository<Unit, Integer> {
     

@@ -1,7 +1,7 @@
 CREATE TABLE `Category` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(100) NOT NULL,
-  `status` TINYINT(1) DEFAULT 1,
+  `is_active` TINYINT(1) DEFAULT 1,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -10,7 +10,7 @@ CREATE TABLE `Category` (
 CREATE TABLE `Unit` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(100) NOT NULL,
-  `status` TINYINT(1) DEFAULT 1,
+  `is_active` TINYINT(1) DEFAULT 1,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -20,7 +20,7 @@ CREATE TABLE `Product` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(100),
   `code` VARCHAR(50),
-  `status` TINYINT(1) DEFAULT 1,
+  `is_active` TINYINT(1) DEFAULT 1,
   `is_service_item` TINYINT(1) DEFAULT 0,
   `is_purchasable` TINYINT(1) DEFAULT 1,
   `is_sellable` TINYINT(1) DEFAULT 1,
@@ -44,20 +44,20 @@ CREATE TABLE `User` (
   `password` VARCHAR(255) NOT NULL,
   `gender` VARCHAR(10),
   `contact` VARCHAR(20),
-  `status` TINYINT(1) DEFAULT 1,
+  `is_active` TINYINT(1) DEFAULT 1,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 );
 
-INSERT INTO `Category` (`name`, `status`) VALUES 
+INSERT INTO `Category` (`name`, `is_active`) VALUES 
 ('Smartphones', 1),
 ('Laptops', 1),
 ('Accessories', 1),
 ('Tablets', 1),
 ('Smartwatches', 1);
 
-INSERT INTO `Unit` (`name`, `status`) VALUES 
+INSERT INTO `Unit` (`name`, `is_active`) VALUES 
 ('Piece', 1),
 ('Box', 1),
 ('Packet', 1),
@@ -65,7 +65,7 @@ INSERT INTO `Unit` (`name`, `status`) VALUES
 ('Bundle', 1);
 
 INSERT INTO `Product` 
-(`name`, `code`, `status`, `is_service_item`, `is_purchasable`, `is_sellable`, `cost_price`, `selling_price`, `mrp`, `category_id`, `unit_id`) 
+(`name`, `code`, `is_active`, `is_service_item`, `is_purchasable`, `is_sellable`, `cost_price`, `selling_price`, `mrp`, `category_id`, `unit_id`) 
 VALUES
 ('iPhone 14 Pro', 'IP14P', 1, 0, 1, 1, 950.00, 1099.00, 1199.00, 1, 1),
 ('Samsung Galaxy S23', 'SGS23', 1, 0, 1, 1, 800.00, 999.00, 1050.00, 1, 1),
@@ -93,8 +93,4 @@ VALUES
 ('Sony Headphones', 'SH01', 1, 0, 1, 1, 60.00, 79.00, 89.00, 3, 3),
 ('HP Envy', 'HPE', 1, 0, 1, 1, 700.00, 899.00, 999.00, 2, 2);
 
-INSERT INTO `User` (full_name, username, email, password, gender, contact, status) VALUES
-('Admin User', 'admin', 'admin@example.com', 'Admin@123', 'Male', '9800000001', 1),
-('Sandip Shakya', 'sandip', 'sandip@example.com', 'User@123', 'Male', '9800000002', 1),
-('Ram Bahadur', 'ram_bahadur', 'ram@example.com', 'User@123', 'Male', '9800000003', 1);
 

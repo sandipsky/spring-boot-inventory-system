@@ -1,4 +1,4 @@
-package com.sandipsky.spring_boot_inventory_system.entity;
+package com.sandipsky.inventory_system.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +14,7 @@ public class Product {
     @Column(nullable = false, unique = true)
     private String name;
     private String code;
-    private boolean status;
+    private boolean isActive;
     private boolean isServiceItem = false;
     private boolean isPurchasable = true;
     private boolean isSellable = true;
