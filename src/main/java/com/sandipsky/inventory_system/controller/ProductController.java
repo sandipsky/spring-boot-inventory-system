@@ -3,8 +3,11 @@ package com.sandipsky.inventory_system.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import com.sandipsky.inventory_system.dto.ProductDTO;
+import com.sandipsky.inventory_system.dto.filter.RequestDTO;
 import com.sandipsky.inventory_system.entity.Product;
 import com.sandipsky.inventory_system.service.ProductService;
+import org.springframework.data.domain.*;
 
 import java.util.List;
 
@@ -20,18 +23,23 @@ public class ProductController {
         return service.getProducts();
     }
 
+    @PostMapping("/view")
+    public Page<Product> getPaginatedProductsList(@RequestBody RequestDTO request) {
+        return service.getPaginatedProductsList(request);
+    }
+
     @GetMapping("/{id}")
     public Product getProduct(@PathVariable int id) {
         return service.getProductById(id);
     }
 
     @PostMapping()
-    public Product createProduct(@RequestBody Product product) {
+    public Product createProduct(@RequestBody ProductDTO product) {
         return service.saveProduct(product);
     }
 
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable int id, @RequestBody Product product) {
+    public Product updateProduct(@PathVariable int id, @RequestBody ProductDTO product) {
         return service.updateProduct(id, product);
     }
 
