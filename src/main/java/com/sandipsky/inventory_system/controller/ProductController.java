@@ -19,17 +19,17 @@ public class ProductController {
     private ProductService service;
 
     @GetMapping()
-    public List<Product> getProducts() {
+    public List<ProductDTO> getProducts() {
         return service.getProducts();
     }
 
     @PostMapping("/view")
-    public Page<Product> getPaginatedProductsList(@RequestBody RequestDTO request) {
+    public Page<ProductDTO> getPaginatedProductsList(@RequestBody RequestDTO request) {
         return service.getPaginatedProductsList(request);
     }
 
     @GetMapping("/{id}")
-    public Product getProduct(@PathVariable int id) {
+    public ProductDTO getProduct(@PathVariable int id) {
         return service.getProductById(id);
     }
 

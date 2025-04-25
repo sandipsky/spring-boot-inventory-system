@@ -55,23 +55,26 @@ public class ProductService {
         return repository.save(product);
     }
 
-    public Page<Product> getPaginatedProductsList(RequestDTO request) {
+    public Page<ProductDTO> getPaginatedProductsList(RequestDTO request) {
         Pageable pageable = PageRequest.of(
                 request.getPagination() != null ? request.getPagination().getPageIndex() : 0,
                 request.getPagination() != null ? request.getPagination().getPageSize() : 25,
                 specBuilder.buildSort(request.getSortDTO()));
-
+    
         Specification<Product> spec = specBuilder.buildSpecification(request.getFilter());
-        Page<Product> page = repository.findAll(spec, pageable);
-        return page;
+        Page<Product> productPage = repository.findAll(spec, pageable);
+        return productPage.map(this::mapToDTO);
     }
 
-    public List<Product> getProducts() {
-        return repository.findAll();
+    public List<ProductDTO> getProducts() {
+        return repository.findAll().stream()
+                .map(this::mapToDTO)
+                .toList();
     }
 
-    public Product getProductById(int id) {
-        return repository.findById(id).get();
+    public ProductDTO getProductById(int id) {
+        Product product = repository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        return mapToDTO(product);
     }
 
     public Product updateProduct(int id, ProductDTO product) {
@@ -97,6 +100,26 @@ public class ProductService {
     }
 
     public void deleteProduct(int id) {
+        repository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
         repository.deleteById(id);
+    }
+
+    private ProductDTO mapToDTO(Product product) {
+        ProductDTO dto = new ProductDTO();
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        dto.setCode(product.getCode());
+        dto.setCostPrice(product.getCostPrice());
+        dto.setSellingPrice(product.getSellingPrice());
+        dto.setMrp(product.getMrp());
+        dto.setActive(product.isActive());
+        dto.setPurchasable(product.isPurchasable());
+        dto.setSellable(product.isSellable());
+        dto.setServiceItem(product.isServiceItem());
+        dto.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
+        dto.setCategoryName(product.getCategory() != null ? product.getCategory().getName() : null);
+        dto.setUnitId(product.getUnit() != null ? product.getUnit().getId() : null);
+        dto.setUnitName(product.getUnit() != null ? product.getUnit().getName() : null);
+        return dto;
     }
 }
