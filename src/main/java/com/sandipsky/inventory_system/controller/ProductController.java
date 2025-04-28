@@ -2,16 +2,11 @@ package com.sandipsky.inventory_system.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import com.sandipsky.inventory_system.dto.ApiResponse;
 import com.sandipsky.inventory_system.dto.ProductDTO;
 import com.sandipsky.inventory_system.dto.filter.RequestDTO;
-import com.sandipsky.inventory_system.entity.Product;
 import com.sandipsky.inventory_system.service.ProductService;
-import com.sandipsky.inventory_system.util.ResponseUtil;
 
 import org.springframework.data.domain.*;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -38,14 +33,13 @@ public class ProductController {
     }
 
     @PostMapping()
-    public ResponseEntity<ApiResponse<Product>> createProduct(@RequestBody ProductDTO product) {
-        Product res = service.saveProduct(product);
-        return ResponseEntity.ok(ResponseUtil.success(res.getId(), "Product Added successfully"));
+    public void createProduct(@RequestBody ProductDTO product) {
+        service.saveProduct(product);
     }
 
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable int id, @RequestBody ProductDTO product) {
-        return service.updateProduct(id, product);
+    public void updateProduct(@PathVariable int id, @RequestBody ProductDTO product) {
+        service.updateProduct(id, product);
     }
 
     @DeleteMapping("/{id}")

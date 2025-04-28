@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sandipsky.inventory_system.entity.Category;
+import com.sandipsky.inventory_system.exception.DuplicateResourceException;
+import com.sandipsky.inventory_system.exception.ResourceNotFoundException;
 import com.sandipsky.inventory_system.repository.CategoryRepository;
 
 import java.util.List;
@@ -15,6 +17,12 @@ public class CategoryService {
     private CategoryRepository repository;
 
     public Category saveCategory(Category category) {
+        if (category.getName() == "" || category.getName() == null) {
+            throw new RuntimeException("Category name cannot be null or blank");
+        }
+        if (repository.existsByName(category.getName())) {
+            throw new DuplicateResourceException("Category with the same name already exists");
+        }
         return repository.save(category);
     }
 
@@ -23,17 +31,23 @@ public class CategoryService {
     }
 
     public Category getCategoryById(int id) {
-        return repository.findById(id).get();
+        Category existing = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        return existing;
     }
 
     public Category updateCategory(int id, Category category) {
-        Category existing = repository.findById(id).get();
+        Category existing = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+        if (repository.existsByName(category.getName())) {
+            throw new DuplicateResourceException("Category with the same name already exists");
+        }
         existing.setName(category.getName());
         existing.setActive(category.isActive());
         return repository.save(existing);
     }
 
     public void deleteCategory(int id) {
+        repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         repository.deleteById(id);
     }
 }

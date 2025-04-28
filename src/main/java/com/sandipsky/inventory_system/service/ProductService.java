@@ -8,13 +8,17 @@ import com.sandipsky.inventory_system.dto.filter.RequestDTO;
 import com.sandipsky.inventory_system.entity.Category;
 import com.sandipsky.inventory_system.entity.Product;
 import com.sandipsky.inventory_system.entity.Unit;
+import com.sandipsky.inventory_system.exception.DuplicateResourceException;
+import com.sandipsky.inventory_system.exception.ResourceNotFoundException;
 import com.sandipsky.inventory_system.repository.CategoryRepository;
 import com.sandipsky.inventory_system.repository.ProductRepository;
 import com.sandipsky.inventory_system.repository.UnitRepository;
+import com.sandipsky.inventory_system.util.ResponseUtil;
 import com.sandipsky.inventory_system.util.SpecificationBuilder;
 
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -32,7 +36,11 @@ public class ProductService {
 
     private final SpecificationBuilder<Product> specBuilder = new SpecificationBuilder<>();
 
-    public Product saveProduct(ProductDTO dto) {
+    public void saveProduct(ProductDTO dto) {
+        if (repository.existsByName(dto.getName())) {
+            throw new DuplicateResourceException("Product with the same name already exists");
+        }
+
         Product product = new Product();
         product.setName(dto.getName());
         product.setCode(dto.getCode());
@@ -46,13 +54,14 @@ public class ProductService {
 
         // Set the Category and Unit based on the IDs
         Category category = categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         Unit unit = unitRepository.findById(dto.getUnitId())
-                .orElseThrow(() -> new RuntimeException("Unit not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Unit not found"));
 
         product.setCategory(category);
         product.setUnit(unit);
-        return repository.save(product);
+        repository.save(product);
+        ResponseEntity.ok(ResponseUtil.success(product.getId(), "Product Added successfully"));
     }
 
     public Page<ProductDTO> getPaginatedProductsList(RequestDTO request) {
@@ -60,7 +69,7 @@ public class ProductService {
                 request.getPagination() != null ? request.getPagination().getPageIndex() : 0,
                 request.getPagination() != null ? request.getPagination().getPageSize() : 25,
                 specBuilder.buildSort(request.getSortDTO()));
-    
+
         Specification<Product> spec = specBuilder.buildSpecification(request.getFilter());
         Page<Product> productPage = repository.findAll(spec, pageable);
         return productPage.map(this::mapToDTO);
@@ -73,17 +82,21 @@ public class ProductService {
     }
 
     public ProductDTO getProductById(int id) {
-        Product product = repository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        Product product = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         return mapToDTO(product);
     }
 
-    public Product updateProduct(int id, ProductDTO product) {
-        Product existing = repository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+    public void updateProduct(int id, ProductDTO product) {
+        Product existing = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        if (repository.existsByName(product.getName())) {
+            throw new DuplicateResourceException("Product with the same name already exists");
+        }
 
         Category category = categoryRepository.findById(product.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         Unit unit = unitRepository.findById(product.getUnitId())
-                .orElseThrow(() -> new RuntimeException("Unit not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Unit not found"));
 
         existing.setName(product.getName());
         existing.setCode(product.getCode());
@@ -96,11 +109,12 @@ public class ProductService {
         existing.setMrp(product.getMrp());
         existing.setCategory(category);
         existing.setUnit(unit);
-        return repository.save(existing);
+        repository.save(existing);
+        ResponseEntity.ok(ResponseUtil.success(product.getId(), "Product Updated successfully"));
     }
 
     public void deleteProduct(int id) {
-        repository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         repository.deleteById(id);
     }
 
