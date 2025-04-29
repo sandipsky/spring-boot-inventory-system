@@ -17,12 +17,13 @@ public class CategoryService {
     private CategoryRepository repository;
 
     public Category saveCategory(Category category) {
-        if (category.getName() == "" || category.getName() == null) {
+        if (category.getName() == null || category.getName().trim().isEmpty()) {
             throw new RuntimeException("Category name cannot be null or blank");
         }
-        if (repository.existsByName(category.getName())) {
+        if (repository.existsByName(category.getName().trim())) {
             throw new DuplicateResourceException("Category with the same name already exists");
         }
+        category.setName(category.getName().trim());
         return repository.save(category);
     }
 
@@ -36,12 +37,15 @@ public class CategoryService {
     }
 
     public Category updateCategory(int id, Category category) {
+        if (category.getName() == null || category.getName().trim().isEmpty()) {
+            throw new RuntimeException("Category name cannot be null or blank");
+        }
         Category existing = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-        if (repository.existsByName(category.getName())) {
+        if (repository.existsByNameAndIdNot(category.getName().trim(), id)) {
             throw new DuplicateResourceException("Category with the same name already exists");
         }
-        existing.setName(category.getName());
+        existing.setName(category.getName().trim());
         existing.setActive(category.isActive());
         return repository.save(existing);
     }

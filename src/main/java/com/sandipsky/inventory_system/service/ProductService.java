@@ -13,12 +13,10 @@ import com.sandipsky.inventory_system.exception.ResourceNotFoundException;
 import com.sandipsky.inventory_system.repository.CategoryRepository;
 import com.sandipsky.inventory_system.repository.ProductRepository;
 import com.sandipsky.inventory_system.repository.UnitRepository;
-import com.sandipsky.inventory_system.util.ResponseUtil;
 import com.sandipsky.inventory_system.util.SpecificationBuilder;
 
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -36,14 +34,18 @@ public class ProductService {
 
     private final SpecificationBuilder<Product> specBuilder = new SpecificationBuilder<>();
 
-    public void saveProduct(ProductDTO dto) {
+    public Product saveProduct(ProductDTO dto) {
         if (repository.existsByName(dto.getName())) {
             throw new DuplicateResourceException("Product with the same name already exists");
         }
 
+        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+            throw new RuntimeException("Product name cannot be null or blank");
+        }
+
         Product product = new Product();
-        product.setName(dto.getName());
-        product.setCode(dto.getCode());
+        product.setName(dto.getName().trim());
+        product.setCode(dto.getCode().trim());
         product.setCostPrice(dto.getCostPrice());
         product.setSellingPrice(dto.getSellingPrice());
         product.setMrp(dto.getMrp());
@@ -60,8 +62,7 @@ public class ProductService {
 
         product.setCategory(category);
         product.setUnit(unit);
-        repository.save(product);
-        ResponseEntity.ok(ResponseUtil.success(product.getId(), "Product Added successfully"));
+        return repository.save(product);
     }
 
     public Page<ProductDTO> getPaginatedProductsList(RequestDTO request) {
@@ -86,10 +87,15 @@ public class ProductService {
         return mapToDTO(product);
     }
 
-    public void updateProduct(int id, ProductDTO product) {
-        Product existing = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+    public Product updateProduct(int id, ProductDTO product) {
+        Product existing = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
-        if (repository.existsByName(product.getName())) {
+        if (product.getName() == null || product.getName().trim().isEmpty()) {
+            throw new RuntimeException("Product name cannot be null or blank");
+        }
+
+        if (repository.existsByNameAndIdNot(product.getName(), id)) {
             throw new DuplicateResourceException("Product with the same name already exists");
         }
 
@@ -98,8 +104,8 @@ public class ProductService {
         Unit unit = unitRepository.findById(product.getUnitId())
                 .orElseThrow(() -> new ResourceNotFoundException("Unit not found"));
 
-        existing.setName(product.getName());
-        existing.setCode(product.getCode());
+        existing.setName(product.getName().trim());
+        existing.setCode(product.getCode().trim());
         existing.setActive(product.isActive());
         existing.setServiceItem(product.isServiceItem());
         existing.setPurchasable(product.isPurchasable());
@@ -109,8 +115,7 @@ public class ProductService {
         existing.setMrp(product.getMrp());
         existing.setCategory(category);
         existing.setUnit(unit);
-        repository.save(existing);
-        ResponseEntity.ok(ResponseUtil.success(product.getId(), "Product Updated successfully"));
+        return repository.save(existing);
     }
 
     public void deleteProduct(int id) {

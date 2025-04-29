@@ -1,10 +1,13 @@
 package com.sandipsky.inventory_system.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.sandipsky.inventory_system.dto.ApiResponse;
 import com.sandipsky.inventory_system.entity.Category;
 import com.sandipsky.inventory_system.service.CategoryService;
+import com.sandipsky.inventory_system.util.ResponseUtil;
 
 import java.util.List;
 
@@ -26,17 +29,20 @@ public class CategoryController {
     }
 
     @PostMapping()
-    public Category createCategory(@RequestBody Category category) {
-        return service.saveCategory(category);
+    public ResponseEntity<ApiResponse<Category>> createCategory(@RequestBody Category category) {
+        Category res = service.saveCategory(category);
+        return ResponseEntity.ok(ResponseUtil.success(res.getId(), "Category Added successfully"));
     }
 
     @PutMapping("/{id}")
-    public Category updateCategory(@PathVariable int id, @RequestBody Category category) {
-        return service.updateCategory(id, category);
+    public ResponseEntity<ApiResponse<Category>> updateCategory(@PathVariable int id, @RequestBody Category category) {
+        Category res = service.updateCategory(id, category);
+        return ResponseEntity.ok(ResponseUtil.success(res.getId(), "Category Updated successfully"));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteCategory(@PathVariable int id) {
+    public ResponseEntity<ApiResponse<Category>> deleteCategory(@PathVariable int id) {
         service.deleteCategory(id);
+        return ResponseEntity.ok(ResponseUtil.success(id, "Category Deleted successfully"));
     }
 }

@@ -7,5 +7,6 @@ import com.sandipsky.inventory_system.entity.Product;
 
 public interface ProductRepository extends JpaRepository<Product, Integer>, JpaSpecificationExecutor<Product> {
     boolean existsByName(String name);
+    boolean existsByNameAndIdNot(String name, int id);
 }
 
