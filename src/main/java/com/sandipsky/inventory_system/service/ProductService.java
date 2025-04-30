@@ -44,24 +44,7 @@ public class ProductService {
         }
 
         Product product = new Product();
-        product.setName(dto.getName().trim());
-        product.setCode(dto.getCode().trim());
-        product.setCostPrice(dto.getCostPrice());
-        product.setSellingPrice(dto.getSellingPrice());
-        product.setMrp(dto.getMrp());
-        product.setActive(dto.isActive());
-        product.setPurchasable(dto.isPurchasable());
-        product.setSellable(dto.isSellable());
-        product.setServiceItem(dto.isServiceItem());
-
-        // Set the Category and Unit based on the IDs
-        Category category = categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-        Unit unit = unitRepository.findById(dto.getUnitId())
-                .orElseThrow(() -> new ResourceNotFoundException("Unit not found"));
-
-        product.setCategory(category);
-        product.setUnit(unit);
+        mapDtoToEntity(dto, product);
         return repository.save(product);
     }
 
@@ -99,22 +82,7 @@ public class ProductService {
             throw new DuplicateResourceException("Product with the same name already exists");
         }
 
-        Category category = categoryRepository.findById(product.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-        Unit unit = unitRepository.findById(product.getUnitId())
-                .orElseThrow(() -> new ResourceNotFoundException("Unit not found"));
-
-        existing.setName(product.getName().trim());
-        existing.setCode(product.getCode().trim());
-        existing.setActive(product.isActive());
-        existing.setServiceItem(product.isServiceItem());
-        existing.setPurchasable(product.isPurchasable());
-        existing.setSellable(product.isSellable());
-        existing.setCostPrice(product.getCostPrice());
-        existing.setSellingPrice(product.getSellingPrice());
-        existing.setMrp(product.getMrp());
-        existing.setCategory(category);
-        existing.setUnit(unit);
+        mapDtoToEntity(product, existing);
         return repository.save(existing);
     }
 
@@ -140,5 +108,25 @@ public class ProductService {
         dto.setUnitId(product.getUnit() != null ? product.getUnit().getId() : null);
         dto.setUnitName(product.getUnit() != null ? product.getUnit().getName() : null);
         return dto;
+    }
+
+    private void mapDtoToEntity(ProductDTO dto, Product product) {
+        product.setName(dto.getName().trim());
+        product.setCode(dto.getCode().trim());
+        product.setCostPrice(dto.getCostPrice());
+        product.setSellingPrice(dto.getSellingPrice());
+        product.setMrp(dto.getMrp());
+        product.setActive(dto.isActive());
+        product.setPurchasable(dto.isPurchasable());
+        product.setSellable(dto.isSellable());
+        product.setServiceItem(dto.isServiceItem());
+
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        Unit unit = unitRepository.findById(dto.getUnitId())
+                .orElseThrow(() -> new ResourceNotFoundException("Unit not found"));
+
+        product.setCategory(category);
+        product.setUnit(unit);
     }
 }
