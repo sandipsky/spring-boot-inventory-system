@@ -1,0 +1,56 @@
+package com.sandipsky.inventory_system.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.sandipsky.inventory_system.dto.DropdownDTO;
+import com.sandipsky.inventory_system.repository.CategoryRepository;
+import com.sandipsky.inventory_system.repository.ProductRepository;
+import com.sandipsky.inventory_system.repository.UnitRepository;
+import com.sandipsky.inventory_system.repository.UserRepository;
+
+import java.util.List;
+
+@Service
+public class DropdownService {
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private UnitRepository unitRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public List<DropdownDTO> getProductsDropdown(String serviceType, String type, String status) {
+        Boolean isService = switch (serviceType.toLowerCase()) {
+            case "service" -> true;
+            case "inventory" -> false;
+            default -> null; // "all"
+        };
+        Boolean isPurchasable = "purchasable".equalsIgnoreCase(type) ? true : null;
+        Boolean isSellable = "sellable".equalsIgnoreCase(type) ? true : null;
+        Boolean isActive = "active".equalsIgnoreCase(status) ? true : null;
+        return productRepository.findFilteredDropdown(isService, isPurchasable, isSellable, isActive);
+    }
+
+    public List<DropdownDTO> getUnitsDropdown(String status) {
+        Boolean isActive = "active".equalsIgnoreCase(status) ? true : null;
+        return unitRepository.findFilteredDropdown(isActive);
+    }
+
+    public List<DropdownDTO> getCategoryDropdown(String status) {
+        Boolean isActive = "active".equalsIgnoreCase(status) ? true : null;
+        return categoryRepository.findFilteredDropdown(isActive);
+    }
+
+    public List<DropdownDTO> getUserDropdown(String status) {
+        Boolean isActive = "active".equalsIgnoreCase(status) ? true : null;
+        return userRepository.findFilteredDropdown(isActive);
+    }
+
+}
