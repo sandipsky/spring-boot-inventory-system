@@ -18,6 +18,8 @@ public interface UserRepository extends JpaRepository<User, Integer>, JpaSpecifi
 
     boolean existsByEmailAndIdNot(String email, int id);
 
+    User findByUsername(String username);
+
     @Query("""
                 SELECT new com.sandipsky.inventory_system.dto.DropdownDTO(u.id, u.username)
                 FROM User u

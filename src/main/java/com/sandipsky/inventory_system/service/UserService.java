@@ -2,6 +2,7 @@ package com.sandipsky.inventory_system.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sandipsky.inventory_system.dto.UserDTO;
 import com.sandipsky.inventory_system.dto.filter.RequestDTO;
@@ -13,7 +14,7 @@ import com.sandipsky.inventory_system.util.SpecificationBuilder;
 
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
-
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
@@ -23,8 +24,12 @@ public class UserService {
     @Autowired
     private UserRepository repository;
 
+    // @Autowired
+    // private PasswordEncoder passwordEncoder;
+
     private final SpecificationBuilder<User> specBuilder = new SpecificationBuilder<>();
 
+    @Transactional
     public User saveUser(UserDTO dto) {
         if (repository.existsByUsername(dto.getUsername())) {
             throw new DuplicateResourceException("Username already exists");
@@ -97,7 +102,8 @@ public class UserService {
         user.setUsername(dto.getUsername().trim());
         user.setFullName(dto.getFullName());
         user.setEmail(dto.getEmail().trim());
-        user.setPassword(dto.getPassword()); // Consider hashing this
+        // String hashedPassword = passwordEncoder.encode(dto.getPassword());
+        // user.setPassword(hashedPassword);
         user.setGender(dto.getGender());
         user.setContact(dto.getContact());
         user.setActive(dto.isActive());
