@@ -24,8 +24,8 @@ public class UserService {
     @Autowired
     private UserRepository repository;
 
-    // @Autowired
-    // private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private final SpecificationBuilder<User> specBuilder = new SpecificationBuilder<>();
 
@@ -102,8 +102,8 @@ public class UserService {
         user.setUsername(dto.getUsername().trim());
         user.setFullName(dto.getFullName());
         user.setEmail(dto.getEmail().trim());
-        // String hashedPassword = passwordEncoder.encode(dto.getPassword());
-        // user.setPassword(hashedPassword);
+        String hashedPassword = passwordEncoder.encode(dto.getPassword());
+        user.setPassword(hashedPassword);
         user.setGender(dto.getGender());
         user.setContact(dto.getContact());
         user.setActive(dto.isActive());
