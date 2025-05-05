@@ -1,6 +1,7 @@
 package com.sandipsky.inventory_system.entity;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -29,7 +30,18 @@ public class User implements UserDetails {
     private String password;
     private String gender;
     private String contact;
-    private boolean isActive;
+
+    @Column(name = "is_active")
+    private boolean isActive = true;
+
+    @Column(name = "account_non_locked")
+    private boolean accountNonLocked = true;
+     
+    @Column(name = "failed_attempt")
+    private int failedAttempt = 0;
+     
+    @Column(name = "lock_time")
+    private Date lockTime;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -45,6 +45,9 @@ CREATE TABLE `User` (
   `gender` VARCHAR(10),
   `contact` VARCHAR(20),
   `is_active` TINYINT(1) DEFAULT 1,
+  `account_non_locked` TINYINT(1) DEFAULT 1,
+  `failed_attempt` INT DEFAULT 0,
+  `lock_time` DATETIME DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)

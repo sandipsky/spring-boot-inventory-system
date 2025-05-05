@@ -7,7 +7,6 @@ import io.jsonwebtoken.ExpiredJwtException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -33,21 +32,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(404).body(response);
     }
 
-    @ExceptionHandler(ResponseNotFoundException.class)
-    public ResponseEntity<ApiResponse<Object>> handleResponseNotFound(ResponseNotFoundException ex) {
-        ApiResponse<Object> response = ResponseUtil.error(ex.getMessage(), 204);
-        return ResponseEntity.status(204).body(response);
-    }
-
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse<Object>> handleBadCredentials(BadCredentialsException ex) {
-        ApiResponse<Object> response = ResponseUtil.error("Username or password incorrect", 401);
+        ApiResponse<Object> response = ResponseUtil.error(ex.getMessage(), 401);
         return ResponseEntity.status(401).body(response);
     }
 
-    @ExceptionHandler(AccountStatusException.class)
-    public ResponseEntity<ApiResponse<Object>> handleAccountStatus(AccountStatusException ex) {
-        ApiResponse<Object> response = ResponseUtil.error("The account is locked", 403);
+    @ExceptionHandler(AccountLockException.class)
+    public ResponseEntity<ApiResponse<Object>> handleAccountStatus(AccountLockException ex) {
+        ApiResponse<Object> response = ResponseUtil.error(ex.getMessage(), 403);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 

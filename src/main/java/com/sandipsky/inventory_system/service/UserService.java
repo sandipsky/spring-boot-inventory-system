@@ -37,7 +37,7 @@ public class UserService {
         if (repository.existsByEmail(dto.getEmail())) {
             throw new DuplicateResourceException("Email already exists");
         }
-
+        
         User user = new User();
         mapDtoToEntity(dto, user);
         return repository.save(user);

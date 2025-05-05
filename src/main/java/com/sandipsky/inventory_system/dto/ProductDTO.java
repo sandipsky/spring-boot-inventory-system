@@ -1,5 +1,6 @@
 package com.sandipsky.inventory_system.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
@@ -20,6 +21,7 @@ public class ProductDTO {
     private String categoryName;
     private int unitId;
     private String unitName;
+    @JsonProperty("is_active")
     private boolean isActive;
     private boolean isPurchasable;
     private boolean isSellable;
