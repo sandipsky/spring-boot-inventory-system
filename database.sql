@@ -44,6 +44,7 @@ CREATE TABLE `User` (
   `password` VARCHAR(255) NOT NULL,
   `gender` VARCHAR(10),
   `contact` VARCHAR(20),
+  `image_url` VARCHAR(255),
   `is_active` TINYINT(1) DEFAULT 1,
   `account_non_locked` TINYINT(1) DEFAULT 1,
   `failed_attempt` INT DEFAULT 0,
@@ -95,5 +96,6 @@ VALUES
 ('Amazon Fire HD', 'AFHD', 1, 0, 1, 1, 80.00, 109.00, 120.00, 4, 4),
 ('Sony Headphones', 'SH01', 1, 0, 1, 1, 60.00, 79.00, 89.00, 3, 3),
 ('HP Envy', 'HPE', 1, 0, 1, 1, 700.00, 899.00, 999.00, 2, 2);
+
 
 

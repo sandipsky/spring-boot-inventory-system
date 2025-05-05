@@ -8,10 +8,14 @@ import com.sandipsky.inventory_system.service.UserService;
 import com.sandipsky.inventory_system.util.ResponseUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.*;
 
+import java.nio.file.Files;
 import java.util.List;
 
 @RestController
@@ -36,15 +40,17 @@ public class UserController {
         return service.getUserById(id);
     }
 
-    @PostMapping()
-    public ResponseEntity<ApiResponse<User>> createUser(@RequestBody UserDTO user) {
-        User res = service.saveUser(user);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<User>> createUser(@RequestPart("user") UserDTO user,
+            @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+        User res = service.saveUser(user, imageFile);
         return ResponseEntity.ok(ResponseUtil.success(res.getId(), "User created successfully"));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<User>> updateUser(@PathVariable int id, @RequestBody UserDTO user) {
-        User res = service.updateUser(id, user);
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<User>> updateUser(@PathVariable int id, @RequestPart("user") UserDTO user,
+            @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+        User res = service.updateUser(id, user, imageFile);
         return ResponseEntity.ok(ResponseUtil.success(res.getId(), "User updated successfully"));
     }
 
@@ -52,5 +58,13 @@ public class UserController {
     public ResponseEntity<ApiResponse<User>> deleteUser(@PathVariable int id) {
         service.deleteUser(id);
         return ResponseEntity.ok(ResponseUtil.success(id, "User deleted successfully"));
+    }
+
+    @GetMapping("/image/{id}")
+    public ResponseEntity<Resource> getUserImageFile(@PathVariable int id) {
+        Resource imageFile = service.getUserImageFileById(id);
+
+        return ResponseEntity.ok()
+                .body(imageFile);
     }
 }

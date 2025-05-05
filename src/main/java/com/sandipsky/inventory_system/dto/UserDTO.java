@@ -18,4 +18,6 @@ public class UserDTO {
     private String contact;
     @JsonProperty("is_active")
     private boolean isActive;
+    @JsonProperty("image_url")
+    private boolean imageUrl;
 }

@@ -31,6 +31,8 @@ public class User implements UserDetails {
     private String gender;
     private String contact;
 
+    private String imageUrl;
+
     @Column(name = "is_active")
     private boolean isActive = true;
 

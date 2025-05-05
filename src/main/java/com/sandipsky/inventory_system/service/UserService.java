@@ -1,8 +1,11 @@
 package com.sandipsky.inventory_system.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.sandipsky.inventory_system.dto.UserDTO;
 import com.sandipsky.inventory_system.dto.filter.RequestDTO;
@@ -16,6 +19,12 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 @Service
@@ -30,16 +39,20 @@ public class UserService {
     private final SpecificationBuilder<User> specBuilder = new SpecificationBuilder<>();
 
     @Transactional
-    public User saveUser(UserDTO dto) {
+    public User saveUser(UserDTO dto, MultipartFile imageFile) {
         if (repository.existsByUsername(dto.getUsername())) {
             throw new DuplicateResourceException("Username already exists");
         }
         if (repository.existsByEmail(dto.getEmail())) {
             throw new DuplicateResourceException("Email already exists");
         }
-        
+
         User user = new User();
         mapDtoToEntity(dto, user);
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String imageUrl = saveImageFile(imageFile);
+            user.setImageUrl(imageUrl);
+        }
         return repository.save(user);
     }
 
@@ -64,7 +77,7 @@ public class UserService {
         return mapToDTO(user);
     }
 
-    public User updateUser(int id, UserDTO dto) {
+    public User updateUser(int id, UserDTO dto, MultipartFile imageFile) {
         User existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -77,12 +90,38 @@ public class UserService {
         }
 
         mapDtoToEntity(dto, existing);
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String imageUrl = saveImageFile(imageFile);
+            existing.setImageUrl(imageUrl);
+        }
         return repository.save(existing);
     }
 
     public void deleteUser(int id) {
         repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         repository.deleteById(id);
+    }
+
+    public Resource getUserImageFileById(int id) {
+        User user = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (user.getImageUrl() == null || user.getImageUrl().isBlank()) {
+            throw new ResourceNotFoundException("Image not found for user");
+        }
+
+        try {
+            Path filePath = Paths.get(user.getImageUrl().replaceFirst("/", "")).toAbsolutePath();
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (resource.exists() && resource.isReadable()) {
+                return resource;
+            } else {
+                throw new ResourceNotFoundException("File not found or unreadable");
+            }
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Invalid file path", e);
+        }
     }
 
     private UserDTO mapToDTO(User user) {
@@ -107,5 +146,24 @@ public class UserService {
         user.setGender(dto.getGender());
         user.setContact(dto.getContact());
         user.setActive(dto.isActive());
+    }
+
+    private String saveImageFile(MultipartFile file) {
+        try {
+            String uploadDir = "uploads/users/";
+            String fileName = file.getOriginalFilename();
+            Path uploadPath = Paths.get(uploadDir);
+
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            Path filePath = uploadPath.resolve(fileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            return "/" + uploadDir + fileName; // e.g., /uploads/users/user_123.jpg
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save image file", e);
+        }
     }
 }
