@@ -91,6 +91,7 @@ public class UserService {
 
         mapDtoToEntity(dto, existing);
         if (imageFile != null && !imageFile.isEmpty()) {
+            deleteImageFileIfExists(existing.getImageUrl());
             String imageUrl = saveImageFile(imageFile);
             existing.setImageUrl(imageUrl);
         }
@@ -98,7 +99,9 @@ public class UserService {
     }
 
     public void deleteUser(int id) {
-        repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User user = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        deleteImageFileIfExists(user.getImageUrl());
         repository.deleteById(id);
     }
 
@@ -164,6 +167,18 @@ public class UserService {
             return "/" + uploadDir + fileName; // e.g., /uploads/users/user_123.jpg
         } catch (IOException e) {
             throw new RuntimeException("Failed to save image file", e);
+        }
+    }
+
+    private void deleteImageFileIfExists(String imageUrl) {
+        if (imageUrl != null && !imageUrl.isBlank()) {
+            try {
+                Path filePath = Paths.get(imageUrl.replaceFirst("/", "")).toAbsolutePath();
+                Files.deleteIfExists(filePath);
+            } catch (IOException e) {
+                // Optionally log warning but don't block main flow
+                System.err.println("Failed to delete image file: " + e.getMessage());
+            }
         }
     }
 }

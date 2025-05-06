@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.sandipsky.inventory_system.dto.DropdownDTO;
 import com.sandipsky.inventory_system.repository.CategoryRepository;
+import com.sandipsky.inventory_system.repository.PartyRepository;
 import com.sandipsky.inventory_system.repository.ProductRepository;
 import com.sandipsky.inventory_system.repository.UnitRepository;
 import com.sandipsky.inventory_system.repository.UserRepository;
@@ -16,6 +17,9 @@ public class DropdownService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private PartyRepository partyRepository;
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -36,6 +40,16 @@ public class DropdownService {
         Boolean isSellable = "sellable".equalsIgnoreCase(type) ? true : null;
         Boolean isActive = "active".equalsIgnoreCase(status) ? true : null;
         return productRepository.findFilteredDropdown(isService, isPurchasable, isSellable, isActive);
+    }
+
+    public List<DropdownDTO> getPartyDropdown(String type, String status) {
+        String productType = switch (type.toLowerCase()) {
+            case "customer" -> "Customer";
+            case "vendor" -> "Vendor";
+            default -> null; // "all"
+        };
+        Boolean isActive = "active".equalsIgnoreCase(status) ? true : null;
+        return partyRepository.findFilteredDropdown(productType, isActive);
     }
 
     public List<DropdownDTO> getUnitsDropdown(String status) {

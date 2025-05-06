@@ -22,6 +22,13 @@ public class DropdownController {
         return service.getProductsDropdown(serviceType, type, status);
     }
 
+    @GetMapping("/party/{type}/{status}")
+    public List<DropdownDTO> getProductsDropdown(
+            @PathVariable String type,
+            @PathVariable String status) {
+        return service.getPartyDropdown(type, status);
+    }
+
     @GetMapping("/units/{status}")
     public List<DropdownDTO> getUnitsDropdown(@PathVariable String status) {
         return service.getUnitsDropdown(status);
