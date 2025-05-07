@@ -5,11 +5,14 @@ import org.springframework.stereotype.Service;
 
 import com.sandipsky.inventory_system.dto.PartyDTO;
 import com.sandipsky.inventory_system.dto.filter.RequestDTO;
+import com.sandipsky.inventory_system.entity.AccountMaster;
 import com.sandipsky.inventory_system.entity.Party;
-import com.sandipsky.inventory_system.exception.DuplicateResourceException;
 import com.sandipsky.inventory_system.exception.ResourceNotFoundException;
+import com.sandipsky.inventory_system.repository.AccountMasterRepository;
 import com.sandipsky.inventory_system.repository.PartyRepository;
 import com.sandipsky.inventory_system.util.SpecificationBuilder;
+
+import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,12 +25,13 @@ public class PartyService {
     @Autowired
     private PartyRepository repository;
 
+    @Autowired
+    private AccountMasterRepository accountMasterRepository;
+
     private final SpecificationBuilder<Party> specBuilder = new SpecificationBuilder<>();
 
+    @Transactional
     public Party saveParty(PartyDTO dto) {
-        if (repository.existsByName(dto.getName())) {
-            throw new DuplicateResourceException("Party with the same name already exists");
-        }
 
         if (dto.getName() == null || dto.getName().trim().isEmpty()) {
             throw new RuntimeException("Party name cannot be null or blank");
@@ -35,6 +39,27 @@ public class PartyService {
 
         Party party = new Party();
         mapDtoToEntity(dto, party);
+
+        AccountMaster pAccountMaster = new AccountMaster();
+        pAccountMaster.setAccountName(party.getName());
+        pAccountMaster.setParty(party);
+        if (party.getType().equals("Customer")) {
+            pAccountMaster.setAccountType("Receivables");
+            AccountMaster parent = accountMasterRepository.findByAccountName("Trade Receivables");
+            pAccountMaster.setParentId(parent.getId());
+            pAccountMaster.setParentAccountName(parent.getAccountName());
+            pAccountMaster.setPartyType("Customer");
+            pAccountMaster.setRemarks("For sales entry purpose");
+        } else {
+            pAccountMaster.setAccountType("Payables");
+            AccountMaster parent = accountMasterRepository.findByAccountName("Trader Payable");
+            pAccountMaster.setParentId(parent.getId());
+            pAccountMaster.setParentAccountName(parent.getAccountName());
+            pAccountMaster.setPartyType("Vendor");
+            pAccountMaster.setRemarks("For purchase entry purpose");
+        }
+        accountMasterRepository.save(pAccountMaster);
+
         return repository.save(party);
     }
 
@@ -68,11 +93,26 @@ public class PartyService {
             throw new RuntimeException("Party name cannot be null or blank");
         }
 
-        if (repository.existsByNameAndIdNot(party.getName(), id)) {
-            throw new DuplicateResourceException("Party with the same name already exists");
-        }
-
         mapDtoToEntity(party, existing);
+
+        AccountMaster pAccountMaster = accountMasterRepository.findByPartyId(id);
+        
+        if (existing.getType().equals("Customer")) {
+            pAccountMaster.setAccountType("Receivables");
+            AccountMaster parent = accountMasterRepository.findByAccountName("Trade Receivables");
+            pAccountMaster.setParentId(parent.getId());
+            pAccountMaster.setParentAccountName(parent.getAccountName());
+            pAccountMaster.setPartyType("Customer");
+            pAccountMaster.setRemarks("For sales entry purpose");
+        } else {
+            pAccountMaster.setAccountType("Payables");
+            AccountMaster parent = accountMasterRepository.findByAccountName("Trader Payable");
+            pAccountMaster.setParentId(parent.getId());
+            pAccountMaster.setParentAccountName(parent.getAccountName());
+            pAccountMaster.setPartyType("Vendor");
+            pAccountMaster.setRemarks("For purchase entry purpose");
+        }
+        accountMasterRepository.save(pAccountMaster);
         return repository.save(existing);
     }
 
@@ -96,7 +136,6 @@ public class PartyService {
     }
 
     private void mapDtoToEntity(PartyDTO dto, Party party) {
-        party.setId(dto.getId());
         party.setName(dto.getName().trim());
         party.setRegistrationNumber(dto.getRegistrationNumber().trim());
         party.setContact(dto.getContact().trim());

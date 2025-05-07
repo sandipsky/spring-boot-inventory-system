@@ -74,12 +74,13 @@ CREATE TABLE `account_master` (
   `account_code` VARCHAR(50),
   `account_name` VARCHAR(100) NOT NULL,
   `account_type` VARCHAR(100) NOT NULL,
-  `active_status` TINYINT(1) DEFAULT 1,
+  `is_active` TINYINT(1) DEFAULT 1,
   `deletable` TINYINT(1) DEFAULT 1,
   `parent_account_name` VARCHAR(100),
   `parent_id` INT DEFAULT 0,
   `remarks` TEXT,
-  `party_id` INT DEFAULT NULL,
+  `party_id` INT DEFAULT NULL UNIQUE,
+  `party_type` VARCHAR(50),
   PRIMARY KEY (`id`),
   FOREIGN KEY (`party_id`) REFERENCES `Party`(`id`)
 );
@@ -140,7 +141,7 @@ VALUES
 ('Ecom Vendor House', 'REG12353', 1, 'Vendor', '9866677885', 'Nepalgunj, Nepal', 'vendor5@ecomvendor.com', 'Online platform supplier'),
 ('City Electronics', 'REG12354', 1, 'Customer', '9812345678', 'Hetauda, Nepal', 'customer5@cityelectronics.com', 'Retail electronics chain');
 
-INSERT INTO `account_master` (`id`, `account_code`, `account_name`, `account_type`, `active_status`, `deletable`, `parent_account_name`, `parent_id`, `remarks`, `party_id`) VALUES
+INSERT INTO `account_master` (`id`, `account_code`, `account_name`, `account_type`, `is_active`, `deletable`, `parent_account_name`, `parent_id`, `remarks`, `party_id`) VALUES
 (1, 'C-000', 'Cash In Hand', 'Cash & Cash Equivalents', 1, 0, NULL, 0, NULL, NULL),
 (2, 'S-000', 'Sales', 'Direct Income', 1, 0, NULL, 0, NULL, NULL),
 (3, 'C-001', 'Cash', 'Cash & Cash Equivalents', 1, 0, 'Cash In Hand', 1, NULL, NULL),
