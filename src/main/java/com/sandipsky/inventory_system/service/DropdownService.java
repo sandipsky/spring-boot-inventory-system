@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sandipsky.inventory_system.dto.DropdownDTO;
+import com.sandipsky.inventory_system.repository.AccountMasterRepository;
 import com.sandipsky.inventory_system.repository.CategoryRepository;
 import com.sandipsky.inventory_system.repository.PartyRepository;
 import com.sandipsky.inventory_system.repository.ProductRepository;
@@ -20,6 +21,9 @@ public class DropdownService {
 
     @Autowired
     private PartyRepository partyRepository;
+
+    @Autowired
+    private AccountMasterRepository accountRepository;
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -50,6 +54,21 @@ public class DropdownService {
         };
         Boolean isActive = "active".equalsIgnoreCase(status) ? true : null;
         return partyRepository.findFilteredDropdown(productType, isActive);
+    }
+
+    public List<DropdownDTO> getAccountMasterDropdown(String type, String partyType, String status) {
+        Boolean atype = switch (type.toLowerCase()) {
+            case "party" -> true;
+            case "nonparty" -> false;
+            default -> null; // "all"
+        };
+        String ptype = switch (partyType.toLowerCase()) {
+            case "customer" -> "Customer";
+            case "vendor" -> "Vendor";
+            default -> null; // "all"
+        };
+        Boolean isActive = "active".equalsIgnoreCase(status) ? true : null;
+        return accountRepository.findFilteredDropdown(atype, ptype, isActive);
     }
 
     public List<DropdownDTO> getUnitsDropdown(String status) {

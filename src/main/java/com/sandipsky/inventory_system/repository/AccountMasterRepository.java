@@ -18,14 +18,20 @@ public interface AccountMasterRepository
 
   AccountMaster findByAccountName(String accountName);
 
-  // @Query("""
-  // SELECT new com.sandipsky.inventory_system.dto.DropdownDTO(p.id, p.name)
-  // FROM AccountMaster p
-  // WHERE (:type IS NULL OR p.type = :type)
-  // AND (:isActive IS NULL OR p.isActive = :isActive)
-  // """)
-  // List<DropdownDTO> findFilteredDropdown(String type,
-  // Boolean isActive);
+  @Query("""
+      SELECT new com.sandipsky.inventory_system.dto.DropdownDTO(p.id, p.accountName)
+      FROM AccountMaster p
+      WHERE (:type IS NULL OR
+             (:type = TRUE AND p.party.id IS NOT NULL) OR
+             (:type = FALSE AND p.party.id IS NULL))
+        AND (:isActive IS NULL OR p.isActive = :isActive)
+        AND (
+            p.party.id IS NULL OR
+            (:partyType IS NULL OR p.partyType = :partyType)
+        )
+      """)
+  List<DropdownDTO> findFilteredDropdown(Boolean type,
+      String partyType, Boolean isActive);
 
   @Query("""
           SELECT p

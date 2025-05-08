@@ -23,10 +23,18 @@ public class DropdownController {
     }
 
     @GetMapping("/party/{type}/{status}")
-    public List<DropdownDTO> getProductsDropdown(
+    public List<DropdownDTO> getPartyDropdown(
             @PathVariable String type,
             @PathVariable String status) {
         return service.getPartyDropdown(type, status);
+    }
+
+    @GetMapping("/accountMaster/{type}/{partyType}/{status}")
+    public List<DropdownDTO> getAccountMasterDropdown(
+            @PathVariable String type,
+            @PathVariable String partyType,
+            @PathVariable String status) {
+        return service.getAccountMasterDropdown(type, partyType, status);
     }
 
     @GetMapping("/units/{status}")
@@ -34,7 +42,7 @@ public class DropdownController {
         return service.getUnitsDropdown(status);
     }
 
-    @GetMapping("/categorys/{status}")
+    @GetMapping("/category/{status}")
     public List<DropdownDTO> getCategorysDropdown(@PathVariable String status) {
         return service.getCategoryDropdown(status);
     }
