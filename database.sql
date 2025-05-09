@@ -81,8 +81,30 @@ CREATE TABLE `account_master` (
   `remarks` TEXT,
   `party_id` INT DEFAULT NULL UNIQUE,
   `party_type` VARCHAR(50),
+   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`party_id`) REFERENCES `Party`(`id`)
+);
+
+CREATE TABLE `master_purchase` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100),
+  `code` VARCHAR(50),
+  `is_active` TINYINT(1) DEFAULT 1,
+  `is_service_item` TINYINT(1) DEFAULT 0,
+  `is_purchasable` TINYINT(1) DEFAULT 1,
+  `is_sellable` TINYINT(1) DEFAULT 1,
+  `cost_price` DECIMAL(12,2),
+  `selling_price` DECIMAL(12,2),
+  `mrp` DECIMAL(12,2),
+  `category_id` INT,
+  `unit_id` INT,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`category_id`) REFERENCES `Category`(`id`),
+  FOREIGN KEY (`unit_id`) REFERENCES `Unit`(`id`)
 );
 
 INSERT INTO `Category` (`name`, `is_active`) VALUES 
