@@ -187,7 +187,17 @@ INSERT INTO `account_master` (`id`, `account_code`, `account_name`, `account_typ
 (21, NULL, 'In. Expenses', 'Other Indirect Expenses', 1, 0, NULL, 0, NULL, NULL),
 (22, NULL, 'Bank Charge', 'Other Indirect Expenses', 1, 0, 'In. Expenses', 21, NULL, NULL),
 (23, NULL, 'Trade Receivables', 'Receivables', 1, 0, NULL, 0, NULL, NULL),
-(24, NULL, 'VAT Free Sales', 'Direct Income', 1, 0, 'Sales', 2, NULL, NULL);
+(24, NULL, 'VAT Free Sales', 'Direct Income', 1, 0, 'Sales', 2, NULL, NULL),
+(25, NULL, 'Tech Distributors Inc.', 'Payables', 1, 1, 'Trader Payable', 18, 'Bulk electronics supplier', 1),
+(26, NULL, 'Digital Nepal', 'Payables', 1, 1, 'Trader Payable', 18, 'Laptop and accessory wholesaler', 3),
+(27, NULL, 'Everest Traders', 'Payables', 1, 1, 'Trader Payable', 18, 'Tablet and watch supplier', 5),
+(28, NULL, 'Quick Supplies', 'Payables', 1, 1, 'Trader Payable', 18, 'General electronics vendor', 7),
+(29, NULL, 'Ecom Vendor House', 'Payables', 1, 1, 'Trader Payable', 18, 'Online platform supplier', 9),
+(30, NULL, 'Gadget Retailers', 'Receivables', 1, 1, 'Trade Receivables', 23, 'Regular mobile retailer', 2),
+(31, NULL, 'Smart Solutions', 'Receivables', 1, 1, 'Trade Receivables', 23, 'Corporate client', 4),
+(32, NULL, 'Valley Mobiles', 'Receivables', 1, 1, 'Trade Receivables', 23, 'Mobile shop chain', 6),
+(33, NULL, 'GreenTech Enterprises', 'Receivables', 1, 1, 'Trade Receivables', 23, 'Eco-tech solutions firm', 8),
+(34, NULL, 'City Electronics', 'Receivables', 1, 1, 'Trade Receivables', 23, 'Retail electronics chain', 10);
 
 
 

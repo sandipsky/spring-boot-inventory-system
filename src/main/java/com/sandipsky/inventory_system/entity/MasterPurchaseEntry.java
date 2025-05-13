@@ -20,12 +20,9 @@ public class MasterPurchaseEntry {
 	@JsonProperty("date")
 	private String date;
 	
-	@JsonProperty("system_pe_no")
+	@JsonProperty("system_entry_no")
 	@Column(columnDefinition = "varchar(25) unique not null")
-	private String systemPeNo;
-	
-	@JsonProperty("bill_date")
-	private String billDate;
+	private String systemEntryNo;
 	
 	@JsonProperty("bill_no")
 	private String billNo;
@@ -71,7 +68,7 @@ public class MasterPurchaseEntry {
 	
 	@JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "masterPurchaseId", referencedColumnName = "id")
+    @JoinColumn(name = "masterPurchaseEntryId", referencedColumnName = "id")
     private List<PurchaseEntry> purchaseEntries;
 	
 	@ManyToOne

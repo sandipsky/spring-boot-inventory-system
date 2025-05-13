@@ -10,8 +10,8 @@ import lombok.Setter;
 public class PurchaseEntryDTO {
     private int id;
 
-    @JsonProperty("master_purchase_id")
-    private int masterPurchaseId;
+    @JsonProperty("master_purchase_entry_id")
+    private int masterPurchaseEntryId;
 
     private String batch;
 
