@@ -22,4 +22,10 @@ public class PurchaseEntryDTO {
     private Double sellingPrice;
     
     private Double mrp;
+
+    @JsonProperty("product_id")
+    private int productId;
+
+    @JsonProperty("product_name")
+    private String productName;
 }

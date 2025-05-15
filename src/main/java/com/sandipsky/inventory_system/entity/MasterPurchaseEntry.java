@@ -15,7 +15,7 @@ import lombok.Setter;
 public class MasterPurchaseEntry {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 	
 	@JsonProperty("date")
 	private String date;

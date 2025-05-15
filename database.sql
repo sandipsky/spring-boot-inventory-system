@@ -89,22 +89,37 @@ CREATE TABLE `account_master` (
 
 CREATE TABLE `master_purchase` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(100),
-  `code` VARCHAR(50),
-  `is_active` TINYINT(1) DEFAULT 1,
-  `is_service_item` TINYINT(1) DEFAULT 0,
-  `is_purchasable` TINYINT(1) DEFAULT 1,
-  `is_sellable` TINYINT(1) DEFAULT 1,
-  `cost_price` DECIMAL(12,2),
-  `selling_price` DECIMAL(12,2),
-  `mrp` DECIMAL(12,2),
-  `category_id` INT,
-  `unit_id` INT,
+  `date` VARCHAR(255),
+  `system_entry_no` VARCHAR(25) UNIQUE NOT NULL,
+  `bill_no` VARCHAR(255),
+  `transaction_type` VARCHAR(255),
+  `sub_total` DOUBLE DEFAULT 0 NOT NULL,
+  `discount` DOUBLE DEFAULT 0 NOT NULL,
+  `non_taxable_amount` DOUBLE DEFAULT 0 NOT NULL,
+  `taxable_amount` DOUBLE DEFAULT 0 NOT NULL,
+  `total_tax` DOUBLE DEFAULT 0 NOT NULL,
+  `rounded` BOOLEAN DEFAULT FALSE,
+  `rounding` DOUBLE DEFAULT 0 NOT NULL,
+  `grand_total` DOUBLE DEFAULT 0 NOT NULL,
+  `discount_type` VARCHAR(255),
+  `remarks` TEXT,
+  `party_id` INT,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`category_id`) REFERENCES `Category`(`id`),
-  FOREIGN KEY (`unit_id`) REFERENCES `Unit`(`id`)
+  FOREIGN KEY (`party_id`) REFERENCES `party`(`id`)
+);
+
+CREATE TABLE purchase_entry (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `master_purchase_entry_id` INT,
+    `batch` VARCHAR(255),
+    `cost_price` DOUBLE,
+    `selling_price` DOUBLE,
+    `mrp` DOUBLE,
+      `product_id` INT,
+    FOREIGN KEY (`master_purchase_entry_id`) REFERENCES `master_purchase`(`id`),
+  FOREIGN KEY (`product_id`) REFERENCES `product`(`id`)
 );
 
 INSERT INTO `Category` (`name`, `is_active`) VALUES 
