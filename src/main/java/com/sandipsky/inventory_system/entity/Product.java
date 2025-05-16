@@ -6,6 +6,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@Table(name = "product")
 public class Product {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -13,13 +14,21 @@ public class Product {
 
     @Column(nullable = false, unique = true)
     private String name;
+
     private String code;
+    
     private boolean isActive;
+    
     private boolean isServiceItem = false;
+    
     private boolean isPurchasable = true;
+    
     private boolean isSellable = true;
+    
     private Double costPrice;
+    
     private Double sellingPrice;
+    
     private Double mrp;
 
     @ManyToOne

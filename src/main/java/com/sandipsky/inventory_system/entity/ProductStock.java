@@ -6,6 +6,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@Table(name = "product_stock")
 public class ProductStock {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -14,7 +15,9 @@ public class ProductStock {
     private String batch;
     
     private Double costPrice;
+
     private Double sellingPrice;
+    
     private Double mrp;
 
     @ManyToOne

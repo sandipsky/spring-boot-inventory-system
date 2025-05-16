@@ -44,6 +44,5 @@ public class AccountMaster {
 
     @Column(name = "party_type", length = 50)
     private String partyType;
-   
 }
 

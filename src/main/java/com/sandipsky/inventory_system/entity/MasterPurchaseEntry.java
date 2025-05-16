@@ -1,9 +1,8 @@
 package com.sandipsky.inventory_system.entity;
-import java.util.List;
 
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

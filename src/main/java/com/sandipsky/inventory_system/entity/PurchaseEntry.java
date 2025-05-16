@@ -18,7 +18,9 @@ public class PurchaseEntry {
     private String batch;
 
     private Double costPrice;
+   
     private Double sellingPrice;
+   
     private Double mrp;
 
     @ManyToOne

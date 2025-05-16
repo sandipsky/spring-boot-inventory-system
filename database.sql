@@ -1,4 +1,4 @@
-CREATE TABLE `Category` (
+CREATE TABLE `category` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(100) NOT NULL,
   `is_active` TINYINT(1) DEFAULT 1,
@@ -7,7 +7,7 @@ CREATE TABLE `Category` (
   PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `Unit` (
+CREATE TABLE `unit` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(100) NOT NULL,
   `is_active` TINYINT(1) DEFAULT 1,
@@ -16,7 +16,7 @@ CREATE TABLE `Unit` (
   PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `Product` (
+CREATE TABLE `product` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(100),
   `code` VARCHAR(50),
@@ -32,11 +32,11 @@ CREATE TABLE `Product` (
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`category_id`) REFERENCES `Category`(`id`),
-  FOREIGN KEY (`unit_id`) REFERENCES `Unit`(`id`)
+  FOREIGN KEY (`category_id`) REFERENCES `category`(`id`),
+  FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`)
 );
 
-CREATE TABLE `User` (
+CREATE TABLE `user` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `full_name` VARCHAR(100) NOT NULL,
   `username` VARCHAR(50) NOT NULL UNIQUE,
@@ -54,12 +54,12 @@ CREATE TABLE `User` (
   PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `Party` (
+CREATE TABLE `party` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(100) NOT NULL,
   `registration_number` VARCHAR(100),
   `is_active` TINYINT(1) DEFAULT 1,
-  `type` ENUM('Customer', 'Vendor') NOT NULL,
+  `type` VARCHAR(50) NOT NULL,
   `contact` VARCHAR(20),
   `address` VARCHAR(255),
   `email` VARCHAR(100),
@@ -84,7 +84,7 @@ CREATE TABLE `account_master` (
    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`party_id`) REFERENCES `Party`(`id`)
+  FOREIGN KEY (`party_id`) REFERENCES `party`(`id`)
 );
 
 CREATE TABLE `master_purchase` (
@@ -122,21 +122,21 @@ CREATE TABLE purchase_entry (
   FOREIGN KEY (`product_id`) REFERENCES `product`(`id`)
 );
 
-INSERT INTO `Category` (`name`, `is_active`) VALUES 
+INSERT INTO `category` (`name`, `is_active`) VALUES 
 ('Smartphones', 1),
 ('Laptops', 1),
 ('Accessories', 1),
 ('Tablets', 1),
 ('Smartwatches', 1);
 
-INSERT INTO `Unit` (`name`, `is_active`) VALUES 
+INSERT INTO `unit` (`name`, `is_active`) VALUES 
 ('Piece', 1),
 ('Box', 1),
 ('Packet', 1),
 ('Set', 1),
 ('Bundle', 1);
 
-INSERT INTO `Product` 
+INSERT INTO `product` 
 (`name`, `code`, `is_active`, `is_service_item`, `is_purchasable`, `is_sellable`, `cost_price`, `selling_price`, `mrp`, `category_id`, `unit_id`) 
 VALUES
 ('iPhone 14 Pro', 'IP14P', 1, 0, 1, 1, 950.00, 1099.00, 1199.00, 1, 1),
@@ -165,7 +165,7 @@ VALUES
 ('Sony Headphones', 'SH01', 1, 0, 1, 1, 60.00, 79.00, 89.00, 3, 3),
 ('HP Envy', 'HPE', 1, 0, 1, 1, 700.00, 899.00, 999.00, 2, 2);
 
-INSERT INTO `Party` (`name`, `registration_number`, `is_active`, `type`, `contact`, `address`, `email`, `remarks`)
+INSERT INTO `party` (`name`, `registration_number`, `is_active`, `type`, `contact`, `address`, `email`, `remarks`)
 VALUES 
 ('Tech Distributors Inc.', 'REG12345', 1, 'Vendor', '9876543210', 'Kathmandu, Nepal', 'vendor1@techdist.com', 'Bulk electronics supplier'),
 ('Gadget Retailers', 'REG12346', 1, 'Customer', '9801234567', 'Lalitpur, Nepal', 'customer1@gadgetretail.com', 'Regular mobile retailer'),
