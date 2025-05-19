@@ -45,5 +45,11 @@ public class MasterPurchaseEntryDTO {
 
     private String remarks;
 
+    @JsonProperty("party_id")
+    private int partyId;
+
+    @JsonProperty("party_name")
+    private String partyName;
+
     private List<PurchaseEntryDTO> purchaseEntries;
 }
