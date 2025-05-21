@@ -10,17 +10,18 @@ import com.sandipsky.inventory_system.dto.ProductDTO;
 import com.sandipsky.inventory_system.dto.filter.RequestDTO;
 import com.sandipsky.inventory_system.entity.MasterPurchaseEntry;
 import com.sandipsky.inventory_system.entity.Product;
+import com.sandipsky.inventory_system.entity.ProductStock;
 import com.sandipsky.inventory_system.entity.PurchaseEntry;
 import com.sandipsky.inventory_system.exception.ResourceNotFoundException;
 import com.sandipsky.inventory_system.repository.MasterPurchaseEntryRepository;
 import com.sandipsky.inventory_system.repository.PartyRepository;
 import com.sandipsky.inventory_system.repository.ProductRepository;
+import com.sandipsky.inventory_system.repository.ProductStockRepository;
+import com.sandipsky.inventory_system.repository.PurchaseEntryRepository;
 import com.sandipsky.inventory_system.util.SpecificationBuilder;
 
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
-
-import java.util.List;
 
 @Service
 public class MasterPurchaseEntryService {
@@ -29,10 +30,16 @@ public class MasterPurchaseEntryService {
     private MasterPurchaseEntryRepository repository;
 
     @Autowired
+    private PurchaseEntryRepository purchaseEntryRepository;
+
+    @Autowired
     private PartyRepository partyRepository;
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private ProductStockRepository productStockRepository;
 
     private final SpecificationBuilder<MasterPurchaseEntry> specBuilder = new SpecificationBuilder<>();
 
@@ -74,28 +81,39 @@ public class MasterPurchaseEntryService {
         masterPurchaseEntry.setParty(partyRepository.findById(masterPurchaseEntryDTO.getPartyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Party not found")));
 
-        // Saving Purchase Entries
+        try {
+            repository.save(masterPurchaseEntry);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+
         if (masterPurchaseEntryDTO.getPurchaseEntries() != null) {
-            List<PurchaseEntry> purchaseEntries = masterPurchaseEntryDTO.getPurchaseEntries().stream().map(pedto -> {
+            for (PurchaseEntryDTO item : masterPurchaseEntryDTO.getPurchaseEntries()) {
+                // Saving purchase Entry
                 PurchaseEntry purchaseEntry = new PurchaseEntry();
-                purchaseEntry.setBatch(pedto.getBatch());
-                purchaseEntry.setCostPrice(pedto.getCostPrice());
-                purchaseEntry.setSellingPrice(pedto.getSellingPrice());
-                purchaseEntry.setMrp(pedto.getMrp());
+                purchaseEntry.setCostPrice(item.getCostPrice());
+                purchaseEntry.setSellingPrice(item.getSellingPrice());
+                purchaseEntry.setMrp(item.getMrp());
+                purchaseEntryRepository.save(purchaseEntry);
 
                 // Updating Product Master
-                Product product = productRepository.findById(pedto.getProductId())
+                Product product = productRepository.findById(item.getProductId())
                         .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
-                product.setCostPrice(pedto.getCostPrice());
-                product.setSellingPrice(pedto.getSellingPrice());
-                product.setMrp(pedto.getMrp());
+                product.setCostPrice(item.getCostPrice());
+                product.setSellingPrice(item.getSellingPrice());
+                product.setMrp(item.getMrp());
                 purchaseEntry.setProduct(product);
                 productRepository.save(product);
 
                 // Creating Product Stock
-                return purchaseEntry;
-            }).toList();
-            masterPurchaseEntry.setPurchaseEntries(purchaseEntries);
+                ProductStock productStock = new ProductStock();
+                productStock.setCostPrice(item.getCostPrice());
+                purchaseEntry.setProduct(product);
+                productStock.setQuantity(item.getQuantity());
+                productStock.setMrp(item.getMrp());
+                productStock.setSellingPrice(item.getSellingPrice());
+                // productStockRepository.save(productStock);
+            }
         }
 
         return repository.save(masterPurchaseEntry);
@@ -138,7 +156,6 @@ public class MasterPurchaseEntryService {
                             .map(pe -> {
                                 PurchaseEntryDTO pedto = new PurchaseEntryDTO();
                                 pedto.setId(pe.getId());
-                                pedto.setBatch(pe.getBatch());
                                 pedto.setCostPrice(pe.getCostPrice());
                                 pedto.setSellingPrice(pe.getSellingPrice());
                                 pedto.setMrp(pe.getMrp());

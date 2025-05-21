@@ -11,9 +11,9 @@ public class ProductStock {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int id;
-
-    private String batch;
     
+    private Double quantity;
+
     private Double costPrice;
 
     private Double sellingPrice;

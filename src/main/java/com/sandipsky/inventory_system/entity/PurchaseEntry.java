@@ -15,7 +15,7 @@ public class PurchaseEntry {
 
     private int masterPurchaseEntryId;
 
-    private String batch;
+    private Double quantity;
 
     private Double costPrice;
    

@@ -15,6 +15,8 @@ public class PurchaseEntryDTO {
 
     private String batch;
 
+    private Double quantity;
+
     @JsonProperty("cost_price")
     private Double costPrice;
 
