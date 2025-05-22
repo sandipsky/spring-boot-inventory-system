@@ -20,7 +20,7 @@ public class ProductStock {
     
     private Double mrp;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "product_id")
     private Product product;
 }

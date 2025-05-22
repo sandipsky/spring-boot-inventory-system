@@ -81,19 +81,17 @@ public class MasterPurchaseEntryService {
         masterPurchaseEntry.setParty(partyRepository.findById(masterPurchaseEntryDTO.getPartyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Party not found")));
 
-        try {
-            repository.save(masterPurchaseEntry);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex.getMessage());
-        }
+        MasterPurchaseEntry savedEntry = repository.save(masterPurchaseEntry);
 
         if (masterPurchaseEntryDTO.getPurchaseEntries() != null) {
             for (PurchaseEntryDTO item : masterPurchaseEntryDTO.getPurchaseEntries()) {
                 // Saving purchase Entry
                 PurchaseEntry purchaseEntry = new PurchaseEntry();
+                purchaseEntry.setQuantity(item.getQuantity());
                 purchaseEntry.setCostPrice(item.getCostPrice());
                 purchaseEntry.setSellingPrice(item.getSellingPrice());
                 purchaseEntry.setMrp(item.getMrp());
+                purchaseEntry.setMasterPurchaseEntryId(savedEntry.getId());
                 purchaseEntryRepository.save(purchaseEntry);
 
                 // Updating Product Master
@@ -106,17 +104,27 @@ public class MasterPurchaseEntryService {
                 productRepository.save(product);
 
                 // Creating Product Stock
-                ProductStock productStock = new ProductStock();
-                productStock.setCostPrice(item.getCostPrice());
-                purchaseEntry.setProduct(product);
-                productStock.setQuantity(item.getQuantity());
-                productStock.setMrp(item.getMrp());
-                productStock.setSellingPrice(item.getSellingPrice());
-                // productStockRepository.save(productStock);
+                ProductStock productStock = productStockRepository.findByProductId(product.getId());
+                if (productStock != null) {
+                    // Update existing stock
+                    productStock.setQuantity(productStock.getQuantity() + item.getQuantity());
+                    productStock.setCostPrice(item.getCostPrice());
+                    productStock.setSellingPrice(item.getSellingPrice());
+                    productStock.setMrp(item.getMrp());
+                } else {
+                    // Create new stock
+                    productStock = new ProductStock();
+                    productStock.setProduct(product);
+                    productStock.setQuantity(item.getQuantity());
+                    productStock.setCostPrice(item.getCostPrice());
+                    productStock.setSellingPrice(item.getSellingPrice());
+                    productStock.setMrp(item.getMrp());
+                }
+                productStockRepository.save(productStock);
             }
         }
 
-        return repository.save(masterPurchaseEntry);
+        return savedEntry;
     }
 
     public MasterPurchaseEntry updateMasterPurchaseEntry(int id, MasterPurchaseEntryDTO product) {

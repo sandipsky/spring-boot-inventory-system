@@ -36,6 +36,16 @@ CREATE TABLE `product` (
   FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`)
 );
 
+CREATE TABLE product_stock (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `quantity` DOUBLE,
+    `cost_price` DOUBLE,
+    `selling_price` DOUBLE,
+    `mrp` DOUBLE,
+    `product_id` INT,
+  FOREIGN KEY (`product_id`) REFERENCES `product`(`id`)
+);
+
 CREATE TABLE `user` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `full_name` VARCHAR(100) NOT NULL,
@@ -87,7 +97,7 @@ CREATE TABLE `account_master` (
   FOREIGN KEY (`party_id`) REFERENCES `party`(`id`)
 );
 
-CREATE TABLE `master_purchase` (
+CREATE TABLE `master_purchase_entry` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `date` VARCHAR(255),
   `system_entry_no` VARCHAR(25) UNIQUE NOT NULL,
@@ -113,12 +123,12 @@ CREATE TABLE `master_purchase` (
 CREATE TABLE purchase_entry (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `master_purchase_entry_id` INT,
-    `batch` VARCHAR(255),
+    `quantity` DOUBLE,
     `cost_price` DOUBLE,
     `selling_price` DOUBLE,
     `mrp` DOUBLE,
-      `product_id` INT,
-    FOREIGN KEY (`master_purchase_entry_id`) REFERENCES `master_purchase`(`id`),
+    `product_id` INT,
+    FOREIGN KEY (`master_purchase_entry_id`) REFERENCES `master_purchase_entry`(`id`),
   FOREIGN KEY (`product_id`) REFERENCES `product`(`id`)
 );
 

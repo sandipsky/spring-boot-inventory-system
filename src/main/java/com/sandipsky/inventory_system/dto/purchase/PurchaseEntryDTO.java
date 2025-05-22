@@ -13,8 +13,6 @@ public class PurchaseEntryDTO {
     @JsonProperty("master_purchase_entry_id")
     private int masterPurchaseEntryId;
 
-    private String batch;
-
     private Double quantity;
 
     @JsonProperty("cost_price")
