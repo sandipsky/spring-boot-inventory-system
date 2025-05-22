@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sandipsky.inventory_system.dto.purchase.MasterPurchaseEntryDTO;
 import com.sandipsky.inventory_system.dto.purchase.PurchaseEntryDTO;
-import com.sandipsky.inventory_system.dto.ProductDTO;
 import com.sandipsky.inventory_system.dto.filter.RequestDTO;
 import com.sandipsky.inventory_system.entity.MasterPurchaseEntry;
 import com.sandipsky.inventory_system.entity.Product;
@@ -141,43 +140,40 @@ public class MasterPurchaseEntryService {
     }
 
     private MasterPurchaseEntryDTO mapToDTO(MasterPurchaseEntry entity) {
-        MasterPurchaseEntryDTO dto = new MasterPurchaseEntryDTO();
-        dto.setId(entity.getId());
-        dto.setDate(entity.getDate());
-        dto.setSystemEntryNo(entity.getSystemEntryNo());
-        dto.setBillNo(entity.getBillNo());
-        dto.setTransactionType(entity.getTransactionType());
-        dto.setSubTotal(entity.getSubTotal());
-        dto.setDiscount(entity.getDiscount());
-        dto.setNonTaxableAmount(entity.getNonTaxableAmount());
-        dto.setTaxableAmount(entity.getTaxableAmount());
-        dto.setTotalTax(entity.getTotalTax());
-        dto.setRounded(entity.isRounded());
-        dto.setRounding(entity.getRounding());
-        dto.setGrandTotal(entity.getGrandTotal());
-        dto.setDiscountType(entity.getDiscountType());
-        dto.setRemarks(entity.getRemarks());
+        MasterPurchaseEntryDTO masterPurchaseEntryDTO = new MasterPurchaseEntryDTO();
+        masterPurchaseEntryDTO.setId(entity.getId());
+        masterPurchaseEntryDTO.setDate(entity.getDate());
+        masterPurchaseEntryDTO.setSystemEntryNo(entity.getSystemEntryNo());
+        masterPurchaseEntryDTO.setBillNo(entity.getBillNo());
+        masterPurchaseEntryDTO.setTransactionType(entity.getTransactionType());
+        masterPurchaseEntryDTO.setSubTotal(entity.getSubTotal());
+        masterPurchaseEntryDTO.setDiscount(entity.getDiscount());
+        masterPurchaseEntryDTO.setNonTaxableAmount(entity.getNonTaxableAmount());
+        masterPurchaseEntryDTO.setTaxableAmount(entity.getTaxableAmount());
+        masterPurchaseEntryDTO.setTotalTax(entity.getTotalTax());
+        masterPurchaseEntryDTO.setRounded(entity.isRounded());
+        masterPurchaseEntryDTO.setRounding(entity.getRounding());
+        masterPurchaseEntryDTO.setGrandTotal(entity.getGrandTotal());
+        masterPurchaseEntryDTO.setDiscountType(entity.getDiscountType());
+        masterPurchaseEntryDTO.setRemarks(entity.getRemarks());
 
         if (entity.getPurchaseEntries() != null) {
-            dto.setPurchaseEntries(
+            masterPurchaseEntryDTO.setPurchaseEntries(
                     entity.getPurchaseEntries().stream()
                             .map(pe -> {
                                 PurchaseEntryDTO pedto = new PurchaseEntryDTO();
                                 pedto.setId(pe.getId());
+                                pedto.setQuantity(pe.getQuantity());
                                 pedto.setCostPrice(pe.getCostPrice());
                                 pedto.setSellingPrice(pe.getSellingPrice());
+                                pedto.setMasterPurchaseEntryId(pe.getMasterPurchaseEntryId());
                                 pedto.setMrp(pe.getMrp());
-                                if (pe.getProduct() != null) {
-                                    ProductDTO pdto = new ProductDTO();
-                                    pdto.setId(pe.getProduct().getId());
-                                    pdto.setName(pe.getProduct().getName());
-                                    // pedto.setProduct(pdto);
-                                }
+                                pedto.setProductId(pe.getProduct().getId());
+                                pedto.setProductName(pe.getProduct().getName());
                                 return pedto;
                             }).toList());
         }
-
-        return dto;
+        return masterPurchaseEntryDTO;
     }
 
 }
