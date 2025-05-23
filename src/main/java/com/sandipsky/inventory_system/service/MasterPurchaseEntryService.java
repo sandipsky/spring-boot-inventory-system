@@ -56,7 +56,40 @@ public class MasterPurchaseEntryService {
     public MasterPurchaseEntryDTO getMasterPurchaseEntryById(int id) {
         MasterPurchaseEntry masterPurchaseEntry = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Purchase Entry with Given Id not found"));
-        return mapToDTO(masterPurchaseEntry);
+        MasterPurchaseEntryDTO masterPurchaseEntryDTO = new MasterPurchaseEntryDTO();
+        masterPurchaseEntryDTO.setId(masterPurchaseEntry.getId());
+        masterPurchaseEntryDTO.setDate(masterPurchaseEntry.getDate());
+        masterPurchaseEntryDTO.setSystemEntryNo(masterPurchaseEntry.getSystemEntryNo());
+        masterPurchaseEntryDTO.setBillNo(masterPurchaseEntry.getBillNo());
+        masterPurchaseEntryDTO.setTransactionType(masterPurchaseEntry.getTransactionType());
+        masterPurchaseEntryDTO.setSubTotal(masterPurchaseEntry.getSubTotal());
+        masterPurchaseEntryDTO.setDiscount(masterPurchaseEntry.getDiscount());
+        masterPurchaseEntryDTO.setNonTaxableAmount(masterPurchaseEntry.getNonTaxableAmount());
+        masterPurchaseEntryDTO.setTaxableAmount(masterPurchaseEntry.getTaxableAmount());
+        masterPurchaseEntryDTO.setTotalTax(masterPurchaseEntry.getTotalTax());
+        masterPurchaseEntryDTO.setRounded(masterPurchaseEntry.isRounded());
+        masterPurchaseEntryDTO.setRounding(masterPurchaseEntry.getRounding());
+        masterPurchaseEntryDTO.setGrandTotal(masterPurchaseEntry.getGrandTotal());
+        masterPurchaseEntryDTO.setDiscountType(masterPurchaseEntry.getDiscountType());
+        masterPurchaseEntryDTO.setRemarks(masterPurchaseEntry.getRemarks());
+
+        if (masterPurchaseEntry.getPurchaseEntries() != null) {
+            masterPurchaseEntryDTO.setPurchaseEntries(
+                    masterPurchaseEntry.getPurchaseEntries().stream()
+                            .map(pe -> {
+                                PurchaseEntryDTO pedto = new PurchaseEntryDTO();
+                                pedto.setId(pe.getId());
+                                pedto.setQuantity(pe.getQuantity());
+                                pedto.setCostPrice(pe.getCostPrice());
+                                pedto.setSellingPrice(pe.getSellingPrice());
+                                pedto.setMasterPurchaseEntryId(pe.getMasterPurchaseEntryId());
+                                pedto.setMrp(pe.getMrp());
+                                pedto.setProductId(pe.getProduct().getId());
+                                pedto.setProductName(pe.getProduct().getName());
+                                return pedto;
+                            }).toList());
+        }
+        return masterPurchaseEntryDTO;
     }
 
     @Transactional
@@ -126,11 +159,78 @@ public class MasterPurchaseEntryService {
         return savedEntry;
     }
 
-    public MasterPurchaseEntry updateMasterPurchaseEntry(int id, MasterPurchaseEntryDTO product) {
-        MasterPurchaseEntry existing = repository.findById(id)
+    public MasterPurchaseEntry updateMasterPurchaseEntry(int id, MasterPurchaseEntryDTO masterPurchaseEntryDTO) {
+        MasterPurchaseEntry masterPurchaseEntry = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Purchase Entry with Given Id not found"));
-        // mapDtoToEntity(product, existing);
-        return repository.save(existing);
+        masterPurchaseEntry.setDate(masterPurchaseEntryDTO.getDate());
+        masterPurchaseEntry.setSystemEntryNo(masterPurchaseEntryDTO.getSystemEntryNo());
+        masterPurchaseEntry.setBillNo(masterPurchaseEntryDTO.getBillNo());
+        masterPurchaseEntry.setTransactionType(masterPurchaseEntryDTO.getTransactionType());
+        masterPurchaseEntry.setSubTotal(masterPurchaseEntryDTO.getSubTotal());
+        masterPurchaseEntry.setDiscount(masterPurchaseEntryDTO.getDiscount());
+        masterPurchaseEntry.setNonTaxableAmount(masterPurchaseEntryDTO.getNonTaxableAmount());
+        masterPurchaseEntry.setTaxableAmount(masterPurchaseEntryDTO.getTaxableAmount());
+        masterPurchaseEntry.setTotalTax(masterPurchaseEntryDTO.getTotalTax());
+        masterPurchaseEntry.setRounded(masterPurchaseEntryDTO.isRounded());
+        masterPurchaseEntry.setRounding(masterPurchaseEntryDTO.getRounding());
+        masterPurchaseEntry.setGrandTotal(masterPurchaseEntryDTO.getGrandTotal());
+        masterPurchaseEntry.setDiscountType(masterPurchaseEntryDTO.getDiscountType());
+        masterPurchaseEntry.setRemarks(masterPurchaseEntryDTO.getRemarks());
+
+        masterPurchaseEntry.setParty(partyRepository.findById(masterPurchaseEntryDTO.getPartyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Party not found")));
+
+        MasterPurchaseEntry savedEntry = repository.save(masterPurchaseEntry);
+
+        if (masterPurchaseEntryDTO.getPurchaseEntries() != null) {
+            for (PurchaseEntryDTO item : masterPurchaseEntryDTO.getPurchaseEntries()) {
+                // Saving purchase Entry
+                PurchaseEntry purchaseEntry;
+                if (item.getId() != 0) {
+                    purchaseEntry = purchaseEntryRepository.findById(item.getId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Purchase Entry not found"));
+                } else {
+                    purchaseEntry = new PurchaseEntry();
+                }
+                purchaseEntry.setQuantity(item.getQuantity());
+                purchaseEntry.setCostPrice(item.getCostPrice());
+                purchaseEntry.setSellingPrice(item.getSellingPrice());
+                purchaseEntry.setMrp(item.getMrp());
+                purchaseEntry.setMasterPurchaseEntryId(savedEntry.getId());
+                purchaseEntryRepository.save(purchaseEntry);
+
+                // Updating Product Master
+                Product product = productRepository.findById(item.getProductId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+                product.setCostPrice(item.getCostPrice());
+                product.setSellingPrice(item.getSellingPrice());
+                product.setMrp(item.getMrp());
+                purchaseEntry.setProduct(product);
+                productRepository.save(product);
+
+                // Creating Product Stock
+                ProductStock productStock = productStockRepository.findByProductId(product.getId());
+                if (productStock != null) {
+                    // Update existing stock
+                    productStock
+                            .setQuantity(productStock.getQuantity() - purchaseEntry.getQuantity() + item.getQuantity());
+                    productStock.setCostPrice(item.getCostPrice());
+                    productStock.setSellingPrice(item.getSellingPrice());
+                    productStock.setMrp(item.getMrp());
+                } else {
+                    // Create new stock
+                    productStock = new ProductStock();
+                    productStock.setProduct(product);
+                    productStock.setQuantity(item.getQuantity());
+                    productStock.setCostPrice(item.getCostPrice());
+                    productStock.setSellingPrice(item.getSellingPrice());
+                    productStock.setMrp(item.getMrp());
+                }
+                productStockRepository.save(productStock);
+            }
+        }
+
+        return savedEntry;
     }
 
     public void deleteMasterPurchaseEntry(int id) {
@@ -156,23 +256,6 @@ public class MasterPurchaseEntryService {
         masterPurchaseEntryDTO.setGrandTotal(entity.getGrandTotal());
         masterPurchaseEntryDTO.setDiscountType(entity.getDiscountType());
         masterPurchaseEntryDTO.setRemarks(entity.getRemarks());
-
-        if (entity.getPurchaseEntries() != null) {
-            masterPurchaseEntryDTO.setPurchaseEntries(
-                    entity.getPurchaseEntries().stream()
-                            .map(pe -> {
-                                PurchaseEntryDTO pedto = new PurchaseEntryDTO();
-                                pedto.setId(pe.getId());
-                                pedto.setQuantity(pe.getQuantity());
-                                pedto.setCostPrice(pe.getCostPrice());
-                                pedto.setSellingPrice(pe.getSellingPrice());
-                                pedto.setMasterPurchaseEntryId(pe.getMasterPurchaseEntryId());
-                                pedto.setMrp(pe.getMrp());
-                                pedto.setProductId(pe.getProduct().getId());
-                                pedto.setProductName(pe.getProduct().getName());
-                                return pedto;
-                            }).toList());
-        }
         return masterPurchaseEntryDTO;
     }
 
