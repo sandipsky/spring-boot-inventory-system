@@ -1,5 +1,7 @@
 package com.sandipsky.inventory_system.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -159,6 +161,7 @@ public class MasterPurchaseEntryService {
         return savedEntry;
     }
 
+    @Transactional
     public MasterPurchaseEntry updateMasterPurchaseEntry(int id, MasterPurchaseEntryDTO masterPurchaseEntryDTO) {
         MasterPurchaseEntry masterPurchaseEntry = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Purchase Entry with Given Id not found"));
@@ -181,6 +184,24 @@ public class MasterPurchaseEntryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Party not found")));
 
         MasterPurchaseEntry savedEntry = repository.save(masterPurchaseEntry);
+
+        // Handle deletion of missing PurchaseEntries
+        List<Integer> updatedIds = masterPurchaseEntryDTO.getPurchaseEntries().stream()
+                .filter(dto -> dto.getId() != 0)
+                .map(PurchaseEntryDTO::getId)
+                .toList();
+
+        for (PurchaseEntry existingEntry : masterPurchaseEntry.getPurchaseEntries()) {
+            if (!updatedIds.contains(existingEntry.getId())) {
+                // Update stock on delete
+                ProductStock stock = productStockRepository.findByProductId(existingEntry.getProduct().getId());
+                if (stock != null) {
+                    stock.setQuantity(stock.getQuantity() - existingEntry.getQuantity());
+                    productStockRepository.save(stock);
+                }
+                purchaseEntryRepository.delete(existingEntry);
+            }
+        }
 
         if (masterPurchaseEntryDTO.getPurchaseEntries() != null) {
             for (PurchaseEntryDTO item : masterPurchaseEntryDTO.getPurchaseEntries()) {
@@ -233,9 +254,16 @@ public class MasterPurchaseEntryService {
         return savedEntry;
     }
 
+    @Transactional
     public void deleteMasterPurchaseEntry(int id) {
-        repository.findById(id)
+        MasterPurchaseEntry masterPurchaseEntry = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Purchase Entry with Given Id not found"));
+        for (PurchaseEntry item : masterPurchaseEntry.getPurchaseEntries()) {
+            ProductStock productStock = productStockRepository.findByProductId(item.getProduct().getId());
+            productStock.setQuantity(productStock.getQuantity() - item.getQuantity());
+            productStockRepository.save(productStock);
+            purchaseEntryRepository.deleteById(item.getId());
+        }
         repository.deleteById(id);
     }
 
