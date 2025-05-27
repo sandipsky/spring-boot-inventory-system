@@ -42,6 +42,9 @@ public class MasterPurchaseEntryService {
     @Autowired
     private ProductStockRepository productStockRepository;
 
+    @Autowired
+    private DocumentNumberService documentNumberService;
+
     private final SpecificationBuilder<MasterPurchaseEntry> specBuilder = new SpecificationBuilder<>();
 
     public Page<MasterPurchaseEntryDTO> getPaginatedMasterPurchaseEntrysList(RequestDTO request) {
@@ -98,7 +101,7 @@ public class MasterPurchaseEntryService {
     public MasterPurchaseEntry saveMasterPurchaseEntry(MasterPurchaseEntryDTO masterPurchaseEntryDTO) {
         MasterPurchaseEntry masterPurchaseEntry = new MasterPurchaseEntry();
         masterPurchaseEntry.setDate(masterPurchaseEntryDTO.getDate());
-        masterPurchaseEntry.setSystemEntryNo(masterPurchaseEntryDTO.getSystemEntryNo());
+        masterPurchaseEntry.setSystemEntryNo(documentNumberService.generatePurchaseNumber());
         masterPurchaseEntry.setBillNo(masterPurchaseEntryDTO.getBillNo());
         masterPurchaseEntry.setTransactionType(masterPurchaseEntryDTO.getTransactionType());
         masterPurchaseEntry.setSubTotal(masterPurchaseEntryDTO.getSubTotal());
@@ -166,7 +169,6 @@ public class MasterPurchaseEntryService {
         MasterPurchaseEntry masterPurchaseEntry = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Purchase Entry with Given Id not found"));
         masterPurchaseEntry.setDate(masterPurchaseEntryDTO.getDate());
-        masterPurchaseEntry.setSystemEntryNo(masterPurchaseEntryDTO.getSystemEntryNo());
         masterPurchaseEntry.setBillNo(masterPurchaseEntryDTO.getBillNo());
         masterPurchaseEntry.setTransactionType(masterPurchaseEntryDTO.getTransactionType());
         masterPurchaseEntry.setSubTotal(masterPurchaseEntryDTO.getSubTotal());

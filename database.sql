@@ -97,6 +97,16 @@ CREATE TABLE `account_master` (
   FOREIGN KEY (`party_id`) REFERENCES `party`(`id`)
 );
 
+CREATE TABLE `document_number` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `module` VARCHAR(50) NOT NULL,          
+    `prefix` VARCHAR(20),                   
+    `start_number` INT NOT NULL DEFAULT 1,    
+    `end_number` INT NOT NULL DEFAULT 999999,  
+    `length` INT NOT NULL DEFAULT 6,          
+    `description` VARCHAR(255)              
+);
+
 CREATE TABLE `master_purchase_entry` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `date` VARCHAR(255),
@@ -120,7 +130,7 @@ CREATE TABLE `master_purchase_entry` (
   FOREIGN KEY (`party_id`) REFERENCES `party`(`id`)
 );
 
-CREATE TABLE purchase_entry (
+CREATE TABLE `purchase_entry` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `master_purchase_entry_id` INT,
     `quantity` DOUBLE,
@@ -223,6 +233,10 @@ INSERT INTO `account_master` (`id`, `account_code`, `account_name`, `account_typ
 (32, NULL, 'Valley Mobiles', 'Receivables', 1, 1, 'Trade Receivables', 23, 'Mobile shop chain', 6),
 (33, NULL, 'GreenTech Enterprises', 'Receivables', 1, 1, 'Trade Receivables', 23, 'Eco-tech solutions firm', 8),
 (34, NULL, 'City Electronics', 'Receivables', 1, 1, 'Trade Receivables', 23, 'Retail electronics chain', 10);
+
+INSERT INTO `document_number` (`module`, `prefix`, `start_number`, `end_number`, `length`, `description`) VALUES 
+('Purchase', 'PE-', 1, 999999, 6, 'Purchase Entry'),
+('Sales', 'SI-', 1, 999999, 6, 'Sales Entry');
 
 
 
