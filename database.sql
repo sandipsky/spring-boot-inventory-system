@@ -127,7 +127,8 @@ CREATE TABLE `master_purchase_entry` (
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`party_id`) REFERENCES `party`(`id`)
+  FOREIGN KEY (`party_id`) REFERENCES `party`(`id`),
+  UNIQUE KEY `unique_party_bill_no` (`party_id`, `bill_no`)
 );
 
 CREATE TABLE `purchase_entry` (

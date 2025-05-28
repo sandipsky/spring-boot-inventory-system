@@ -1,5 +1,6 @@
 package com.sandipsky.inventory_system.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +119,15 @@ public class MasterPurchaseEntryService {
         masterPurchaseEntry.setParty(partyRepository.findById(masterPurchaseEntryDTO.getPartyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Party not found")));
 
-        MasterPurchaseEntry savedEntry = repository.save(masterPurchaseEntry);
+        MasterPurchaseEntry savedEntry = new MasterPurchaseEntry();
+
+        try {
+            savedEntry = repository.save(masterPurchaseEntry);
+        } catch (Exception ex) {
+            if (ex.getMessage().contains("unique_party_bill_no")) {
+                throw new RuntimeException("Bill Number cannot be repeated for the same Vendor");
+            }
+        }
 
         if (masterPurchaseEntryDTO.getPurchaseEntries() != null) {
             for (PurchaseEntryDTO item : masterPurchaseEntryDTO.getPurchaseEntries()) {
@@ -185,23 +194,40 @@ public class MasterPurchaseEntryService {
         masterPurchaseEntry.setParty(partyRepository.findById(masterPurchaseEntryDTO.getPartyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Party not found")));
 
-        MasterPurchaseEntry savedEntry = repository.save(masterPurchaseEntry);
+        MasterPurchaseEntry savedEntry = new MasterPurchaseEntry();
 
-        // Handle deletion of missing PurchaseEntries
-        List<Integer> updatedIds = masterPurchaseEntryDTO.getPurchaseEntries().stream()
-                .filter(dto -> dto.getId() != 0)
-                .map(PurchaseEntryDTO::getId)
-                .toList();
+        try {
+            savedEntry = repository.save(masterPurchaseEntry);
+        } catch (Exception ex) {
+            if (ex.getMessage().contains("unique_party_bill_no")) {
+                throw new RuntimeException("Bill Number cannot be repeated for the same Vendor");
+            }
+        }
 
-        for (PurchaseEntry existingEntry : masterPurchaseEntry.getPurchaseEntries()) {
-            if (!updatedIds.contains(existingEntry.getId())) {
-                // Update stock on delete
-                ProductStock stock = productStockRepository.findByProductId(existingEntry.getProduct().getId());
-                if (stock != null) {
-                    stock.setQuantity(stock.getQuantity() - existingEntry.getQuantity());
-                    productStockRepository.save(stock);
+        List<PurchaseEntry> existingEntries = purchaseEntryRepository.findByMasterPurchaseEntryId(savedEntry.getId());
+        List<Integer> incomingIds = new ArrayList<>();
+        for (PurchaseEntryDTO dto : masterPurchaseEntryDTO.getPurchaseEntries()) {
+            incomingIds.add(dto.getId());
+        }
+
+        for (PurchaseEntry existing : existingEntries) {
+            boolean found = false;
+            for (Integer entryId : incomingIds) {
+                if (existing.getId() == entryId) {
+                    found = true;
+                    break;
                 }
-                purchaseEntryRepository.delete(existingEntry);
+            }
+            if (!found) {
+                ProductStock stock = productStockRepository.findByProductId(existing.getProduct().getId());
+                Double newStock = stock.getQuantity() - existing.getQuantity();
+                if (newStock > 0) {
+                    stock.setQuantity(newStock);
+                } else {
+                    throw new RuntimeException("Product Stock is Already Used");
+                }
+                productStockRepository.save(stock);
+                purchaseEntryRepository.delete(existing);
             }
         }
 
@@ -215,6 +241,7 @@ public class MasterPurchaseEntryService {
                 } else {
                     purchaseEntry = new PurchaseEntry();
                 }
+                Double tempQuantity = purchaseEntry.getQuantity();
                 purchaseEntry.setQuantity(item.getQuantity());
                 purchaseEntry.setCostPrice(item.getCostPrice());
                 purchaseEntry.setSellingPrice(item.getSellingPrice());
@@ -235,8 +262,12 @@ public class MasterPurchaseEntryService {
                 ProductStock productStock = productStockRepository.findByProductId(product.getId());
                 if (productStock != null) {
                     // Update existing stock
-                    productStock
-                            .setQuantity(productStock.getQuantity() - purchaseEntry.getQuantity() + item.getQuantity());
+                    Double newStock = productStock.getQuantity() - tempQuantity + item.getQuantity();
+                    if (newStock > 0) {
+                        productStock.setQuantity(newStock);
+                    } else {
+                        throw new RuntimeException("Product Stock is Already Used");
+                    }
                     productStock.setCostPrice(item.getCostPrice());
                     productStock.setSellingPrice(item.getSellingPrice());
                     productStock.setMrp(item.getMrp());
@@ -262,7 +293,12 @@ public class MasterPurchaseEntryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Purchase Entry with Given Id not found"));
         for (PurchaseEntry item : masterPurchaseEntry.getPurchaseEntries()) {
             ProductStock productStock = productStockRepository.findByProductId(item.getProduct().getId());
-            productStock.setQuantity(productStock.getQuantity() - item.getQuantity());
+            Double newStock = productStock.getQuantity() - item.getQuantity();
+            if (newStock > 0) {
+                productStock.setQuantity(newStock);
+            } else {
+                throw new RuntimeException("Product Stock is Already Used");
+            }
             productStockRepository.save(productStock);
             purchaseEntryRepository.deleteById(item.getId());
         }
