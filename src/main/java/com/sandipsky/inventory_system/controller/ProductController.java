@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.sandipsky.inventory_system.dto.ApiResponse;
 import com.sandipsky.inventory_system.dto.ProductDTO;
+import com.sandipsky.inventory_system.dto.ProductStockDTO;
 import com.sandipsky.inventory_system.dto.filter.RequestDTO;
 import com.sandipsky.inventory_system.entity.Product;
 import com.sandipsky.inventory_system.service.ProductService;
@@ -35,6 +36,11 @@ public class ProductController {
     @GetMapping("/{id}")
     public ProductDTO getProduct(@PathVariable int id) {
         return service.getProductById(id);
+    }
+
+    @GetMapping("/stockInfo/{id}")
+    public ProductStockDTO getProductStockInfo(@PathVariable int id) {
+        return service.getProductStockInfoById(id);
     }
 
     @PostMapping()

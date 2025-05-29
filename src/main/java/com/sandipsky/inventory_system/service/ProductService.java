@@ -4,14 +4,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sandipsky.inventory_system.dto.ProductDTO;
+import com.sandipsky.inventory_system.dto.ProductStockDTO;
 import com.sandipsky.inventory_system.dto.filter.RequestDTO;
 import com.sandipsky.inventory_system.entity.Category;
 import com.sandipsky.inventory_system.entity.Product;
+import com.sandipsky.inventory_system.entity.ProductStock;
 import com.sandipsky.inventory_system.entity.Unit;
 import com.sandipsky.inventory_system.exception.DuplicateResourceException;
 import com.sandipsky.inventory_system.exception.ResourceNotFoundException;
 import com.sandipsky.inventory_system.repository.CategoryRepository;
 import com.sandipsky.inventory_system.repository.ProductRepository;
+import com.sandipsky.inventory_system.repository.ProductStockRepository;
 import com.sandipsky.inventory_system.repository.UnitRepository;
 import com.sandipsky.inventory_system.util.SpecificationBuilder;
 
@@ -25,6 +28,9 @@ public class ProductService {
 
     @Autowired
     private ProductRepository repository;
+
+    @Autowired
+    private ProductStockRepository productStockrepository;
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -68,6 +74,17 @@ public class ProductService {
     public ProductDTO getProductById(int id) {
         Product product = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         return mapToDTO(product);
+    }
+
+    public ProductStockDTO getProductStockInfoById(int id) {
+        ProductStock productStock = productStockrepository.findByProductId(id);
+        ProductStockDTO productStockDTO = new ProductStockDTO();
+        productStockDTO.setId(productStock.getId());
+        productStockDTO.setQuantity(productStock.getQuantity());
+        productStockDTO.setCostPrice(productStock.getCostPrice());
+        productStockDTO.setSellingPrice(productStock.getSellingPrice());
+        productStockDTO.setMrp(productStock.getMrp());
+        return productStockDTO;
     }
 
     public Product updateProduct(int id, ProductDTO product) {
