@@ -47,4 +47,9 @@ public class DocumentNumberController {
     public String generatePurchaseNumber() {
         return service.generatePurchaseNumber();
     }
+
+    @GetMapping("/generateSalesNumber")
+    public String generateSalesNumber() {
+        return service.generateSalesNumber();
+    }
 }
