@@ -34,6 +34,7 @@ public class MasterSalesEntryDTO {
     private boolean rounded;
 
     private double rounding;
+
     @JsonProperty("grand_total")
     private double grandTotal;
 
@@ -41,6 +42,11 @@ public class MasterSalesEntryDTO {
     private String discountType;
 
     private String remarks;
+
+    private boolean isCancelled;
+
+    @JsonProperty("cancel_remarks")
+    private String cancelRemarks;
 
     @JsonProperty("party_id")
     private int partyId;

@@ -36,9 +36,9 @@ public class MasterSalesEntryController {
         return ResponseEntity.ok(ResponseUtil.success(res.getId(), "Sales Added successfully"));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<MasterSalesEntry>> deleteMasterSalesEntry(@PathVariable int id) {
-        service.deleteMasterSalesEntry(id);
-        return ResponseEntity.ok(ResponseUtil.success(id, "Sales Deleted successfully"));
+    @PostMapping("/{id}")
+    public ResponseEntity<ApiResponse<MasterSalesEntry>> cancelMasterSalesEntry(@PathVariable int id, @RequestBody MasterSalesEntryDTO masterSalesEntryDTO) {
+        service.cancelMasterSalesEntry(id, masterSalesEntryDTO);
+        return ResponseEntity.ok(ResponseUtil.success(id, "Sales Cancelled successfully"));
     }
 }

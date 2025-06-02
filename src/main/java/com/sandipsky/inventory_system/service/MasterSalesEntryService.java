@@ -8,6 +8,7 @@ import com.sandipsky.inventory_system.dto.sales.MasterSalesEntryDTO;
 import com.sandipsky.inventory_system.dto.sales.SalesEntryDTO;
 import com.sandipsky.inventory_system.dto.filter.RequestDTO;
 import com.sandipsky.inventory_system.entity.MasterSalesEntry;
+import com.sandipsky.inventory_system.entity.Party;
 import com.sandipsky.inventory_system.entity.ProductStock;
 import com.sandipsky.inventory_system.entity.SalesEntry;
 import com.sandipsky.inventory_system.exception.ResourceNotFoundException;
@@ -73,15 +74,17 @@ public class MasterSalesEntryService {
         if (masterSalesEntry.getSalesEntries() != null) {
             masterSalesEntryDTO.setSalesEntries(
                     masterSalesEntry.getSalesEntries().stream()
-                            .map(pe -> {
-                                SalesEntryDTO pedto = new SalesEntryDTO();
-                                pedto.setId(pe.getId());
-                                pedto.setQuantity(pe.getQuantity());
-                                pedto.setRate(pe.getRate());
-                                pedto.setMasterSalesEntryId(pe.getMasterSalesEntryId());
-                                pedto.setProductId(pe.getProduct().getId());
-                                pedto.setProductName(pe.getProduct().getName());
-                                return pedto;
+                            .map(salesEntry -> {
+                                SalesEntryDTO salesEntryDTO = new SalesEntryDTO();
+                                salesEntryDTO.setId(salesEntry.getId());
+                                salesEntryDTO.setQuantity(salesEntry.getQuantity());
+                                salesEntryDTO.setCostPrice(salesEntry.getCostPrice());
+                                salesEntryDTO.setSellingPrice(salesEntry.getSellingPrice());
+                                salesEntryDTO.setMrp(salesEntry.getMrp());
+                                salesEntryDTO.setMasterSalesEntryId(salesEntry.getMasterSalesEntryId());
+                                salesEntryDTO.setProductId(salesEntry.getProduct().getId());
+                                salesEntryDTO.setProductName(salesEntry.getProduct().getName());
+                                return salesEntryDTO;
                             }).toList());
         }
         return masterSalesEntryDTO;
@@ -102,10 +105,16 @@ public class MasterSalesEntryService {
         masterSalesEntry.setRounding(masterSalesEntryDTO.getRounding());
         masterSalesEntry.setGrandTotal(masterSalesEntryDTO.getGrandTotal());
         masterSalesEntry.setDiscountType(masterSalesEntryDTO.getDiscountType());
-        masterSalesEntry.setRemarks(masterSalesEntryDTO.getRemarks());
 
-        masterSalesEntry.setParty(partyRepository.findById(masterSalesEntryDTO.getPartyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Party not found")));
+        Party party = partyRepository.findById(masterSalesEntryDTO.getPartyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Party not found"));
+        masterSalesEntry.setParty(party);
+
+        if (masterSalesEntryDTO.getRemarks().isEmpty() || masterSalesEntryDTO.getRemarks() == null) {
+            masterSalesEntry.setRemarks("Sold Goods to " + party.getName());
+        } else {
+            masterSalesEntry.setRemarks(masterSalesEntryDTO.getRemarks());
+        }
 
         MasterSalesEntry savedEntry = repository.save(masterSalesEntry);
 
@@ -114,11 +123,13 @@ public class MasterSalesEntryService {
                 // Saving sales Entry
                 SalesEntry salesEntry = new SalesEntry();
                 salesEntry.setQuantity(item.getQuantity());
-                salesEntry.setRate(item.getRate());
+                salesEntry.setCostPrice(item.getCostPrice());
+                salesEntry.setSellingPrice(item.getSellingPrice());
+                salesEntry.setMrp(item.getMrp());
                 salesEntry.setMasterSalesEntryId(savedEntry.getId());
                 salesEntryRepository.save(salesEntry);
 
-                // Creating Product Stock
+                // Changing Product Stock
                 ProductStock productStock = productStockRepository.findByProductId(item.getProductId());
                 Double qty = productStock.getQuantity() - item.getQuantity();
                 if (qty > 0) {
@@ -133,21 +144,24 @@ public class MasterSalesEntryService {
     }
 
     @Transactional
-    public void deleteMasterSalesEntry(int id) {
+    public void cancelMasterSalesEntry(int id, MasterSalesEntryDTO masterSalesEntryDTO) {
         MasterSalesEntry masterSalesEntry = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Sales Entry with Given Id not found"));
+
+        if (masterSalesEntry.isCancelled() == true) {
+            throw new RuntimeException("Sales Entry Already Cancelled");
+        }
+
         for (SalesEntry item : masterSalesEntry.getSalesEntries()) {
             ProductStock productStock = productStockRepository.findByProductId(item.getProduct().getId());
-            Double newStock = productStock.getQuantity() - item.getQuantity();
-            if (newStock > 0) {
-                productStock.setQuantity(newStock);
-            } else {
-                throw new RuntimeException("Product Stock is Already Used");
-            }
+            productStock.setQuantity(productStock.getQuantity() - item.getQuantity());
+
             productStockRepository.save(productStock);
             salesEntryRepository.deleteById(item.getId());
         }
-        repository.deleteById(id);
+        masterSalesEntry.setCancelled(true);
+        masterSalesEntry.setCancelRemarks(masterSalesEntryDTO.getCancelRemarks());
+        repository.save(masterSalesEntry);
     }
 
     private MasterSalesEntryDTO mapToDTO(MasterSalesEntry entity) {

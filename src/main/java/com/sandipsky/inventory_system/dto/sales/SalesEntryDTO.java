@@ -15,8 +15,14 @@ public class SalesEntryDTO {
 
     private Double quantity;
 
-    @JsonProperty("rate")
-    private Double rate;
+    @JsonProperty("cost_price")
+    private Double costPrice;
+
+    @JsonProperty("selling_price")
+    private Double sellingPrice;
+
+    @JsonProperty("mrp")
+    private Double mrp;
 
     @JsonProperty("product_id")
     private int productId;

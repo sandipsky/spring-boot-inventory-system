@@ -17,8 +17,10 @@ public class SalesEntry {
 
     private Double quantity;
 
-    private Double rate;
-   
+    private Double costPrice;
+
+    private Double sellingPrice;
+
     private Double mrp;
 
     @ManyToOne

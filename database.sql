@@ -143,6 +143,42 @@ CREATE TABLE `purchase_entry` (
   FOREIGN KEY (`product_id`) REFERENCES `product`(`id`)
 );
 
+CREATE TABLE `master_sales_entry` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `date` VARCHAR(255),
+  `system_entry_no` VARCHAR(25) UNIQUE NOT NULL,
+  `transaction_type` VARCHAR(255),
+  `sub_total` DOUBLE DEFAULT 0 NOT NULL,
+  `discount` DOUBLE DEFAULT 0 NOT NULL,
+  `non_taxable_amount` DOUBLE DEFAULT 0 NOT NULL,
+  `taxable_amount` DOUBLE DEFAULT 0 NOT NULL,
+  `total_tax` DOUBLE DEFAULT 0 NOT NULL,
+  `rounded` BOOLEAN DEFAULT FALSE,
+  `is_cancelled` BOOLEAN DEFAULT FALSE,
+  `rounding` DOUBLE DEFAULT 0 NOT NULL,
+  `grand_total` DOUBLE DEFAULT 0 NOT NULL,
+  `discount_type` VARCHAR(255),
+  `remarks` TEXT,
+  `cancel_remarks` TEXT,
+  `party_id` INT,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`party_id`) REFERENCES `party`(`id`)
+);
+
+CREATE TABLE `sales_entry` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `master_sales_entry_id` INT,
+    `quantity` DOUBLE,
+    `cost_price` DOUBLE,
+    `selling_price` DOUBLE,
+    `mrp` DOUBLE,
+    `product_id` INT,
+    FOREIGN KEY (`master_sales_entry_id`) REFERENCES `master_sales_entry`(`id`),
+  FOREIGN KEY (`product_id`) REFERENCES `product`(`id`)
+);
+
 INSERT INTO `category` (`name`, `is_active`) VALUES 
 ('Smartphones', 1),
 ('Laptops', 1),
