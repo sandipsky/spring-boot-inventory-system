@@ -11,6 +11,7 @@ import com.sandipsky.inventory_system.dto.purchase.MasterPurchaseEntryDTO;
 import com.sandipsky.inventory_system.dto.purchase.PurchaseEntryDTO;
 import com.sandipsky.inventory_system.dto.filter.RequestDTO;
 import com.sandipsky.inventory_system.entity.MasterPurchaseEntry;
+import com.sandipsky.inventory_system.entity.Party;
 import com.sandipsky.inventory_system.entity.Product;
 import com.sandipsky.inventory_system.entity.ProductStock;
 import com.sandipsky.inventory_system.entity.PurchaseEntry;
@@ -114,10 +115,15 @@ public class MasterPurchaseEntryService {
         masterPurchaseEntry.setRounding(masterPurchaseEntryDTO.getRounding());
         masterPurchaseEntry.setGrandTotal(masterPurchaseEntryDTO.getGrandTotal());
         masterPurchaseEntry.setDiscountType(masterPurchaseEntryDTO.getDiscountType());
-        masterPurchaseEntry.setRemarks(masterPurchaseEntryDTO.getRemarks());
+        Party party = partyRepository.findById(masterPurchaseEntryDTO.getPartyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Party not found"));
+        masterPurchaseEntry.setParty(party);
 
-        masterPurchaseEntry.setParty(partyRepository.findById(masterPurchaseEntryDTO.getPartyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Party not found")));
+        if (masterPurchaseEntryDTO.getRemarks().isEmpty() || masterPurchaseEntryDTO.getRemarks() == null) {
+            masterPurchaseEntry.setRemarks("Purchased Goods from " + party.getName());
+        } else {
+            masterPurchaseEntry.setRemarks(masterPurchaseEntryDTO.getRemarks());
+        }
 
         MasterPurchaseEntry savedEntry = new MasterPurchaseEntry();
 
@@ -189,10 +195,15 @@ public class MasterPurchaseEntryService {
         masterPurchaseEntry.setRounding(masterPurchaseEntryDTO.getRounding());
         masterPurchaseEntry.setGrandTotal(masterPurchaseEntryDTO.getGrandTotal());
         masterPurchaseEntry.setDiscountType(masterPurchaseEntryDTO.getDiscountType());
-        masterPurchaseEntry.setRemarks(masterPurchaseEntryDTO.getRemarks());
+        Party party = partyRepository.findById(masterPurchaseEntryDTO.getPartyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Party not found"));
+        masterPurchaseEntry.setParty(party);
 
-        masterPurchaseEntry.setParty(partyRepository.findById(masterPurchaseEntryDTO.getPartyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Party not found")));
+        if (masterPurchaseEntryDTO.getRemarks().isEmpty() || masterPurchaseEntryDTO.getRemarks() == null) {
+            masterPurchaseEntry.setRemarks("Purchased Goods from " + party.getName());
+        } else {
+            masterPurchaseEntry.setRemarks(masterPurchaseEntryDTO.getRemarks());
+        }
 
         MasterPurchaseEntry savedEntry = new MasterPurchaseEntry();
 

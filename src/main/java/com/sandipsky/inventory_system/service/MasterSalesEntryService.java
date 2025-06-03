@@ -154,7 +154,7 @@ public class MasterSalesEntryService {
 
         for (SalesEntry item : masterSalesEntry.getSalesEntries()) {
             ProductStock productStock = productStockRepository.findByProductId(item.getProduct().getId());
-            productStock.setQuantity(productStock.getQuantity() - item.getQuantity());
+            productStock.setQuantity(productStock.getQuantity() + item.getQuantity());
 
             productStockRepository.save(productStock);
             salesEntryRepository.deleteById(item.getId());
