@@ -7,7 +7,7 @@ import com.sandipsky.inventory_system.dto.ApiResponse;
 import com.sandipsky.inventory_system.dto.purchase.MasterPurchaseEntryDTO;
 import com.sandipsky.inventory_system.dto.filter.RequestDTO;
 import com.sandipsky.inventory_system.entity.MasterPurchaseEntry;
-import com.sandipsky.inventory_system.service.MasterPurchaseEntryService;
+import com.sandipsky.inventory_system.service.PurchaseEntryService;
 import com.sandipsky.inventory_system.util.ResponseUtil;
 
 import org.springframework.data.domain.*;
@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 public class MasterPurchaseEntryController {
 
     @Autowired
-    private MasterPurchaseEntryService service;
+    private PurchaseEntryService service;
 
     @PostMapping("/view")
     public Page<MasterPurchaseEntryDTO> getPaginatedMasterPurchaseEntrysList(@RequestBody RequestDTO request) {

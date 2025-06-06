@@ -22,7 +22,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 
 @Service
-public class MasterSalesEntryService {
+public class SalesEntryService {
 
     @Autowired
     private MasterSalesEntryRepository repository;

@@ -10,12 +10,18 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sandipsky.inventory_system.dto.purchase.MasterPurchaseEntryDTO;
 import com.sandipsky.inventory_system.dto.purchase.PurchaseEntryDTO;
 import com.sandipsky.inventory_system.dto.filter.RequestDTO;
+import com.sandipsky.inventory_system.entity.AccountMaster;
+import com.sandipsky.inventory_system.entity.JournalEntry;
+import com.sandipsky.inventory_system.entity.MasterJournalEntry;
 import com.sandipsky.inventory_system.entity.MasterPurchaseEntry;
 import com.sandipsky.inventory_system.entity.Party;
 import com.sandipsky.inventory_system.entity.Product;
 import com.sandipsky.inventory_system.entity.ProductStock;
 import com.sandipsky.inventory_system.entity.PurchaseEntry;
 import com.sandipsky.inventory_system.exception.ResourceNotFoundException;
+import com.sandipsky.inventory_system.repository.AccountMasterRepository;
+import com.sandipsky.inventory_system.repository.JournalEntryRepository;
+import com.sandipsky.inventory_system.repository.MasterJournalEntryRepository;
 import com.sandipsky.inventory_system.repository.MasterPurchaseEntryRepository;
 import com.sandipsky.inventory_system.repository.PartyRepository;
 import com.sandipsky.inventory_system.repository.ProductRepository;
@@ -27,7 +33,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 
 @Service
-public class MasterPurchaseEntryService {
+public class PurchaseEntryService {
 
     @Autowired
     private MasterPurchaseEntryRepository repository;
@@ -43,6 +49,15 @@ public class MasterPurchaseEntryService {
 
     @Autowired
     private ProductStockRepository productStockRepository;
+
+    @Autowired
+    private MasterJournalEntryRepository masterJournalEntryRepository;
+
+    @Autowired
+    private JournalEntryRepository journalEntryRepository;
+
+    @Autowired
+    private AccountMasterRepository accountMasterRepository;
 
     @Autowired
     private DocumentNumberService documentNumberService;
@@ -134,6 +149,9 @@ public class MasterPurchaseEntryService {
                 throw new RuntimeException("Bill Number cannot be repeated for the same Vendor");
             }
         }
+
+        // Create Journal Entry
+        createJournalEntries(savedEntry);
 
         if (masterPurchaseEntryDTO.getPurchaseEntries() != null) {
             for (PurchaseEntryDTO item : masterPurchaseEntryDTO.getPurchaseEntries()) {
@@ -336,4 +354,101 @@ public class MasterPurchaseEntryService {
         return masterPurchaseEntryDTO;
     }
 
+    private void createJournalEntries(MasterPurchaseEntry masterEntry) {
+        MasterJournalEntry existing = masterJournalEntryRepository.findByMasterPurchaseEntryId(masterEntry.getId())
+                .orElse(null);
+        if (existing != null) {
+            for (JournalEntry existingEntry : existing.getJournalEntries()) {
+                journalEntryRepository.delete(existingEntry);
+            }
+            masterJournalEntryRepository.delete(existing);
+        }
+
+        MasterJournalEntry masterJournalEntry = new MasterJournalEntry();
+        masterJournalEntry.setDate(masterEntry.getDate());
+        masterJournalEntry.setRemarks(masterEntry.getRemarks());
+        masterJournalEntry.setSystemEntryNo(masterEntry.getSystemEntryNo());
+
+        MasterJournalEntry savedJournalEntry = masterJournalEntryRepository.save(masterJournalEntry);
+
+        if (masterEntry.getNonTaxableAmount() > 0) {
+            JournalEntry nonTaxableEntry = new JournalEntry();
+            // VAT Free Purchase Account
+            AccountMaster accountMaster = accountMasterRepository.findByAccountName("VAT Free Purchase")
+                    .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+            nonTaxableEntry.setMasterAccount(accountMaster);
+            nonTaxableEntry.setCreditAmount(0.00);
+            nonTaxableEntry.setDebitAmount(masterEntry.getNonTaxableAmount());
+            nonTaxableEntry.setNarration(masterEntry.getRemarks());
+            nonTaxableEntry.setMasterJournalEntryId(savedJournalEntry.getId());
+            journalEntryRepository.save(nonTaxableEntry);
+        }
+
+        if (masterEntry.getTaxableAmount() > 0) {
+            JournalEntry taxableJournalEntry = new JournalEntry();
+            // VAT Purchase Account
+            AccountMaster accountMaster = accountMasterRepository.findByAccountName("VAT Purchase")
+                    .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+            taxableJournalEntry.setMasterAccount(accountMaster);
+            taxableJournalEntry.setCreditAmount(0.00);
+            taxableJournalEntry.setDebitAmount(masterEntry.getTaxableAmount());
+            taxableJournalEntry.setNarration(masterEntry.getRemarks());
+            taxableJournalEntry.setMasterJournalEntryId(savedJournalEntry.getId());
+            journalEntryRepository.save(taxableJournalEntry);
+
+            JournalEntry taxJournalEntry = new JournalEntry();
+            // Tax Account
+            AccountMaster accountMaster2 = accountMasterRepository.findByAccountName("Tax")
+                    .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+            taxJournalEntry.setMasterAccount(accountMaster2);
+            taxJournalEntry.setCreditAmount(0.00);
+            taxJournalEntry.setDebitAmount(masterEntry.getTotalTax());
+            taxJournalEntry.setNarration(masterEntry.getRemarks());
+            taxJournalEntry.setMasterJournalEntryId(savedJournalEntry.getId());
+            journalEntryRepository.save(taxJournalEntry);
+        }
+
+        if (masterEntry.getRounding() != 0) {
+            JournalEntry roundJournalEntry = new JournalEntry();
+            // Adjustment Account
+            AccountMaster accountMaster = accountMasterRepository.findByAccountName("Adjustment")
+                    .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+            roundJournalEntry.setMasterAccount(accountMaster);
+            if (masterEntry.getRounding() > 0) {
+                roundJournalEntry.setDebitAmount(masterEntry.getRounding());
+                roundJournalEntry.setCreditAmount(0.00);
+            } else {
+                roundJournalEntry.setCreditAmount(masterEntry.getRounding());
+                roundJournalEntry.setDebitAmount(0.00);
+            }
+            roundJournalEntry.setDebitAmount(masterEntry.getNonTaxableAmount());
+            roundJournalEntry.setNarration(masterEntry.getRemarks());
+            roundJournalEntry.setMasterJournalEntryId(savedJournalEntry.getId());
+            journalEntryRepository.save(roundJournalEntry);
+        }
+
+        AccountMaster accountMaster = new AccountMaster();
+        JournalEntry journalEntry = new JournalEntry();
+        if (masterEntry.getTransactionType().equals("Cash")) {
+            // Cash Account
+            accountMaster = accountMasterRepository.findByAccountName("Cash")
+                    .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+
+        } else {
+            accountMaster = accountMasterRepository.findByPartyId(masterEntry.getParty().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+        }
+        journalEntry.setMasterAccount(accountMaster);
+        if (masterEntry.getRounding() > 0) {
+            journalEntry.setDebitAmount(masterEntry.getRounding());
+            journalEntry.setCreditAmount(0.00);
+        } else {
+            journalEntry.setCreditAmount(masterEntry.getRounding());
+            journalEntry.setDebitAmount(0.00);
+        }
+        journalEntry.setDebitAmount(masterEntry.getNonTaxableAmount());
+        journalEntry.setNarration(masterEntry.getRemarks());
+        journalEntry.setMasterJournalEntryId(savedJournalEntry.getId());
+        journalEntryRepository.save(journalEntry);
+    }
 }

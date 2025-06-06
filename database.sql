@@ -274,6 +274,7 @@ INSERT INTO `account_master` (`id`, `account_code`, `account_name`, `account_typ
 INSERT INTO `document_number` (`module`, `prefix`, `start_number`, `end_number`, `length`, `description`) VALUES 
 ('Purchase', 'PE-', 1, 999999, 6, 'Purchase Entry'),
 ('Sales', 'SI-', 1, 999999, 6, 'Sales Entry');
+('Journal', 'J-', 1, 999999, 6, 'Journal Entry');
 
 
 

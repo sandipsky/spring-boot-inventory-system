@@ -100,4 +100,28 @@ public class DocumentNumberService {
         String formattedNumber = String.format("%0" + pref.getLength() + "d", nextNumber);
         return pref.getPrefix() + formattedNumber;
     }
+
+    public String generateJournalNumber() {
+        DocumentNumber pref = repository.findByModule("Journal")
+                .orElseThrow(() -> new RuntimeException("Document preferences not found for Journal"));
+
+        int nextNumber = pref.getStartNumber();
+        Optional<MasterSalesEntry> lastEntryOpt = masterSalesEntryRepository.findTopByOrderByIdDesc();
+
+        if (lastEntryOpt.isPresent()) {
+            String lastNumber = lastEntryOpt.get().getSystemEntryNo();
+            String numericPart = lastNumber.replace(pref.getPrefix(), "");
+            try {
+                nextNumber = Integer.parseInt(numericPart) + 1;
+            } catch (NumberFormatException ignored) {
+            }
+        }
+
+        if (nextNumber > pref.getEndNumber()) {
+            throw new IllegalStateException("Document number has exceeded the configured end number.");
+        }
+
+        String formattedNumber = String.format("%0" + pref.getLength() + "d", nextNumber);
+        return pref.getPrefix() + formattedNumber;
+    }
 }
