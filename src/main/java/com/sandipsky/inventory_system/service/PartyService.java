@@ -45,14 +45,16 @@ public class PartyService {
         pAccountMaster.setParty(party);
         if (party.getType().equals("Customer")) {
             pAccountMaster.setAccountType("Receivables");
-            AccountMaster parent = accountMasterRepository.findByAccountName("Trade Receivables");
+            AccountMaster parent = accountMasterRepository.findByAccountName("Trade Receivables")
+                    .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
             pAccountMaster.setParentId(parent.getId());
             pAccountMaster.setParentAccountName(parent.getAccountName());
             pAccountMaster.setPartyType("Customer");
             pAccountMaster.setRemarks("For sales entry purpose");
         } else {
             pAccountMaster.setAccountType("Payables");
-            AccountMaster parent = accountMasterRepository.findByAccountName("Trader Payable");
+            AccountMaster parent = accountMasterRepository.findByAccountName("Trader Payable")
+                    .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
             pAccountMaster.setParentId(parent.getId());
             pAccountMaster.setParentAccountName(parent.getAccountName());
             pAccountMaster.setPartyType("Vendor");
@@ -95,18 +97,21 @@ public class PartyService {
 
         mapDtoToEntity(party, existing);
 
-        AccountMaster pAccountMaster = accountMasterRepository.findByPartyId(id);
-        
+        AccountMaster pAccountMaster = accountMasterRepository.findByPartyId(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+
         if (existing.getType().equals("Customer")) {
             pAccountMaster.setAccountType("Receivables");
-            AccountMaster parent = accountMasterRepository.findByAccountName("Trade Receivables");
+            AccountMaster parent = accountMasterRepository.findByAccountName("Trade Receivables")
+                    .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
             pAccountMaster.setParentId(parent.getId());
             pAccountMaster.setParentAccountName(parent.getAccountName());
             pAccountMaster.setPartyType("Customer");
             pAccountMaster.setRemarks("For sales entry purpose");
         } else {
             pAccountMaster.setAccountType("Payables");
-            AccountMaster parent = accountMasterRepository.findByAccountName("Trader Payable");
+            AccountMaster parent = accountMasterRepository.findByAccountName("Trader Payable")
+                    .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
             pAccountMaster.setParentId(parent.getId());
             pAccountMaster.setParentAccountName(parent.getAccountName());
             pAccountMaster.setPartyType("Vendor");
