@@ -179,6 +179,31 @@ CREATE TABLE `sales_entry` (
   FOREIGN KEY (`product_id`) REFERENCES `product`(`id`)
 );
 
+
+CREATE TABLE `master_journal_entry` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `date` VARCHAR(255),
+  `system_entry_no` VARCHAR(25) NOT NULL UNIQUE,
+  `remarks` TEXT,
+  `master_purchase_entry_id` INT,
+  `master_sales_entry_id` INT,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`master_purchase_entry_id`) REFERENCES `master_purchase_entry`(`id`),
+  FOREIGN KEY (`master_sales_entry_id`) REFERENCES `master_purchase_entry`(`id`)
+);
+
+CREATE TABLE `journal_entry` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `master_journal_entry_id` INT,
+  `narration` VARCHAR(255),
+  `debit_amount` DOUBLE,
+  `credit_amount` DOUBLE,
+  `account_master_id` INT,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`master_journal_entry_id`) REFERENCES `master_journal_entry`(`id`),
+  FOREIGN KEY (`account_master_id`) REFERENCES `account_master`(`id`)
+);
+
 INSERT INTO `category` (`name`, `is_active`) VALUES 
 ('Smartphones', 1),
 ('Laptops', 1),

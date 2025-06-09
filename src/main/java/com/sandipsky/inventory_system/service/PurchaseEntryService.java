@@ -421,7 +421,6 @@ public class PurchaseEntryService {
                 roundJournalEntry.setCreditAmount(masterEntry.getRounding());
                 roundJournalEntry.setDebitAmount(0.00);
             }
-            roundJournalEntry.setDebitAmount(masterEntry.getNonTaxableAmount());
             roundJournalEntry.setNarration(masterEntry.getRemarks());
             roundJournalEntry.setMasterJournalEntryId(savedJournalEntry.getId());
             journalEntryRepository.save(roundJournalEntry);
@@ -439,14 +438,8 @@ public class PurchaseEntryService {
                     .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
         }
         journalEntry.setMasterAccount(accountMaster);
-        if (masterEntry.getRounding() > 0) {
-            journalEntry.setDebitAmount(masterEntry.getRounding());
-            journalEntry.setCreditAmount(0.00);
-        } else {
-            journalEntry.setCreditAmount(masterEntry.getRounding());
-            journalEntry.setDebitAmount(0.00);
-        }
-        journalEntry.setDebitAmount(masterEntry.getNonTaxableAmount());
+        journalEntry.setCreditAmount(masterEntry.getGrandTotal());
+        journalEntry.setDebitAmount(0.00);
         journalEntry.setNarration(masterEntry.getRemarks());
         journalEntry.setMasterJournalEntryId(savedJournalEntry.getId());
         journalEntryRepository.save(journalEntry);
