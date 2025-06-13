@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/purchase")
-public class MasterPurchaseEntryController {
+public class PurchaseEntryController {
 
     @Autowired
     private PurchaseEntryService service;

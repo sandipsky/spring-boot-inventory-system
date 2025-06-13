@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/sales")
-public class MasterSalesEntryController {
+public class SalesEntryController {
 
     @Autowired
     private SalesEntryService service;

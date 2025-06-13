@@ -17,10 +17,4 @@ public class MasterJournalEntryDTO {
     private String remarks;
 
     private List<JournalEntryDTO> journalEntries;
-
-    @JsonProperty("master_purchase_entry_id")
-    private int masterPurchaseEntryId;
-
-    @JsonProperty("master_sales_entry_id")
-    private int masterSalesEntryId;
 }

@@ -1,5 +1,6 @@
 package com.sandipsky.inventory_system.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sandipsky.inventory_system.dto.journal.MasterJournalEntryDTO;
 import com.sandipsky.inventory_system.dto.journal.JournalEntryDTO;
-import com.sandipsky.inventory_system.dto.filter.RequestDTO;
 import com.sandipsky.inventory_system.entity.MasterJournalEntry;
 import com.sandipsky.inventory_system.entity.AccountMaster;
 import com.sandipsky.inventory_system.entity.JournalEntry;
@@ -16,10 +16,6 @@ import com.sandipsky.inventory_system.exception.ResourceNotFoundException;
 import com.sandipsky.inventory_system.repository.MasterJournalEntryRepository;
 import com.sandipsky.inventory_system.repository.AccountMasterRepository;
 import com.sandipsky.inventory_system.repository.JournalEntryRepository;
-import com.sandipsky.inventory_system.util.SpecificationBuilder;
-
-import org.springframework.data.domain.*;
-import org.springframework.data.jpa.domain.Specification;
 
 @Service
 public class JournalEntryService {
@@ -35,44 +31,13 @@ public class JournalEntryService {
     @Autowired
     private DocumentNumberService documentNumberService;
 
-    private final SpecificationBuilder<MasterJournalEntry> specBuilder = new SpecificationBuilder<>();
-
-    public Page<MasterJournalEntryDTO> getPaginatedMasterJournalEntrysList(RequestDTO request) {
-        Pageable pageable = PageRequest.of(
-                request.getPagination() != null ? request.getPagination().getPageIndex() : 0,
-                request.getPagination() != null ? request.getPagination().getPageSize() : 25,
-                specBuilder.buildSort(request.getSortDTO()));
-
-        Specification<MasterJournalEntry> spec = specBuilder.buildSpecification(request.getFilter());
-        Page<MasterJournalEntry> productPage = repository.findAll(spec, pageable);
-        return productPage.map(this::mapToDTO);
-    }
-
-    public MasterJournalEntryDTO getMasterJournalEntryById(int id) {
-        MasterJournalEntry masterJournalEntry = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Journal Entry with Given Id not found"));
-        MasterJournalEntryDTO masterJournalEntryDTO = new MasterJournalEntryDTO();
-        masterJournalEntryDTO.setId(masterJournalEntry.getId());
-        masterJournalEntryDTO.setDate(masterJournalEntry.getDate());
-        masterJournalEntryDTO.setSystemEntryNo(masterJournalEntry.getSystemEntryNo());
-        masterJournalEntryDTO.setRemarks(masterJournalEntry.getRemarks());
-
-        if (masterJournalEntry.getJournalEntries() != null) {
-            masterJournalEntryDTO.setJournalEntries(
-                    masterJournalEntry.getJournalEntries().stream()
-                            .map(journalEntry -> {
-                                JournalEntryDTO journalEntryDTO = new JournalEntryDTO();
-                                journalEntryDTO.setId(journalEntry.getId());
-                                journalEntryDTO.setAccountMasterId(journalEntry.getMasterAccount().getId());
-                                journalEntryDTO.setAccountMasterName(journalEntry.getMasterAccount().getAccountName());
-                                journalEntryDTO.setCreditAmount(journalEntry.getCreditAmount());
-                                journalEntryDTO.setDebitAmount(journalEntry.getDebitAmount());
-                                journalEntryDTO.setNarration(journalEntry.getNarration());
-                                journalEntryDTO.setMasterJournalEntryId(journalEntry.getMasterJournalEntryId());
-                                return journalEntryDTO;
-                            }).toList());
+    public List<MasterJournalEntryDTO> getAllJournalReport() {
+        List<MasterJournalEntry> entries = repository.findAll();
+        List<MasterJournalEntryDTO> dtoList = new ArrayList<>();
+        for (MasterJournalEntry entry : entries) {
+            dtoList.add(mapToDTO(entry));
         }
-        return masterJournalEntryDTO;
+        return dtoList;
     }
 
     @Transactional
@@ -148,6 +113,19 @@ public class JournalEntryService {
         masterJournalEntryDTO.setDate(entity.getDate());
         masterJournalEntryDTO.setSystemEntryNo(entity.getSystemEntryNo());
         masterJournalEntryDTO.setRemarks(entity.getRemarks());
+        masterJournalEntryDTO.setJournalEntries(
+                entity.getJournalEntries().stream()
+                        .map(pe -> {
+                            JournalEntryDTO jedto = new JournalEntryDTO();
+                            jedto.setId(pe.getId());
+                            jedto.setAccountMasterId(pe.getMasterAccount().getId());
+                            jedto.setAccountMasterName(pe.getMasterAccount().getAccountName());
+                            jedto.setCreditAmount(pe.getCreditAmount());
+                            jedto.setDebitAmount(pe.getDebitAmount());
+                            jedto.setMasterJournalEntryId(pe.getMasterJournalEntryId());
+                            jedto.setNarration(pe.getNarration());
+                            return jedto;
+                        }).toList());
         return masterJournalEntryDTO;
     }
 
