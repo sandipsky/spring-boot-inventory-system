@@ -32,12 +32,12 @@ public class JournalEntryService {
     private DocumentNumberService documentNumberService;
 
     public List<MasterJournalEntryDTO> getAllJournalReport() {
-        List<MasterJournalEntry> entries = repository.findAll();
-        List<MasterJournalEntryDTO> dtoList = new ArrayList<>();
-        for (MasterJournalEntry entry : entries) {
-            dtoList.add(mapToDTO(entry));
+        List<MasterJournalEntry> journalEntries = repository.findAll();
+        List<MasterJournalEntryDTO> journalEntriesDTO = new ArrayList<>();
+        for (MasterJournalEntry entry : journalEntries) {
+            journalEntriesDTO.add(mapToDTO(entry));
         }
-        return dtoList;
+        return journalEntriesDTO;
     }
 
     @Transactional
